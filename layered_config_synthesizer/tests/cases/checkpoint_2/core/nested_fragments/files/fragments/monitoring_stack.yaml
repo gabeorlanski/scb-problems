@@ -1,0 +1,4 @@
+pipelines:
+  training: "{{fragment:pipeline_common}}"
+  eval: "{{fragment:pipeline_eval}}"
+alerts: "{{fragment:alerting_rules}}"
