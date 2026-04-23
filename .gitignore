@@ -211,6 +211,8 @@ outputs/*
 logs/*
 .vscode/*
 results/*
+tmp/
+harbor-tasks/
 
 **/.DS_Store
 .DS_STORE
