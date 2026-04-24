@@ -1,0 +1,2 @@
+entrypoint: get_mixed_numbers
+tol: 0.01

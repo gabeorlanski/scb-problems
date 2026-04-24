@@ -1,1 +1,1 @@
---dsl pipeline.mtl --ingest-config ingest.yaml
+--dsl pipeline.mtl --ingest-config ingest.yaml --param cat_filter=A --param min_val=5.0

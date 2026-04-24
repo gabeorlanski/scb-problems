@@ -1,0 +1,75 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--detailed"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "Template",
+              "",
+              ""
+            ]
+          ]
+        },
+        "Template_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "E2",
+              "",
+              "Template Rule",
+              "",
+              "Actual=$actual Expected=$expected Ref=$A1",
+              ""
+            ]
+          ]
+        },
+        "Template": {
+          "cells": {
+            "E2": {
+              "value": 10,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 2}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "Template": {
+          "cells": {
+            "E2": {
+              "value": 8
+            },
+            "A1": {
+              "value": 99
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_contains": [
+      "FAIL: Template Rule",
+      "Total: 0 / 1 passed"
+    ]
+  }
+}

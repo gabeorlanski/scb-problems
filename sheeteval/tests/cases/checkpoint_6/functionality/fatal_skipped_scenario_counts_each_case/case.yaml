@@ -1,0 +1,86 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--detailed"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name"
+            ],
+            [
+              "FatalScenario"
+            ]
+          ]
+        },
+        "FatalScenario_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "B2",
+              "F",
+              "Gate",
+              "",
+              "",
+              ""
+            ],
+            [
+              "B3",
+              "",
+              "Scenario After Gate",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "FatalScenario": {
+          "cells": {
+            "B2": {
+              "value": 1,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 1}}"
+            },
+            "B3": {
+              "formula": "=A1+A2",
+              "comment": "{\"rule\": {\"kind\": \"scenario\", \"points\": 2}, \"scenarios\": {\"case_a\": {\"input\": {\"A1\": 1, \"A2\": 2}, \"output\": 3}, \"case_b\": {\"input\": {\"A1\": 3, \"A2\": 4}, \"output\": 7}}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "FatalScenario": {
+          "cells": {
+            "B2": {
+              "value": 0
+            },
+            "B3": {
+              "formula": "=A1+A2"
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_contains": [
+      "FAIL: Gate",
+      "FAIL: Scenario After Gate.case_a",
+      "FAIL: Scenario After Gate.case_b",
+      "Total: 0 / 3 passed"
+    ],
+    "stderr_absent": true
+  }
+}

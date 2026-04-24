@@ -1,0 +1,73 @@
+{
+  "case": {
+    "args": [
+      "--check-mode"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "CheckWarn",
+              "",
+              ""
+            ]
+          ]
+        },
+        "CheckWarn_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "B3",
+              "",
+              "",
+              "maybe",
+              "",
+              ""
+            ]
+          ]
+        },
+        "CheckWarn": {
+          "cells": {
+            "B3": {
+              "value": 2,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 1}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "CheckWarn": {
+          "cells": {
+            "B3": {
+              "value": 2
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_contains": [
+      "Total: 1 / 1 passed"
+    ],
+    "stderr_contains": [
+      "expected-outcome"
+    ]
+  }
+}

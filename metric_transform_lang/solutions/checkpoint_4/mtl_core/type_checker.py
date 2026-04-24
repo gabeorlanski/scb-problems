@@ -408,6 +408,7 @@ class PipelineAnalyzer:
 
         # Track schemas: alias -> env
         schemas: dict[str, dict[str, ValueType]] = dict(source_schemas)
+        current_working_env: dict[str, ValueType] | None = None
 
         for join in self.pipeline.joins:
             # Validate left and right exist
@@ -472,15 +473,20 @@ class PipelineAnalyzer:
                     "join project 'timestamp' must be of type timestamp"
                 )
 
-            # Store result with alias (or as temporary)
+            # Make the latest join result available via the implicit '_' alias.
+            schemas["_"] = working_env
+
+            # Optional explicit alias for chained joins.
             if join.result_alias:
                 schemas[join.result_alias] = working_env
-            else:
-                # This is the final working schema (no more joins expected after this)
-                pass
+
+            current_working_env = working_env
+
+        if current_working_env is None:  # pragma: no cover - defensive
+            raise DSLSyntaxError("Multi-source pipeline must have at least one join")
 
         # Return the final working schema from the last join
-        return working_env
+        return current_working_env
 
     def _validate_project_clause(
         self, project: ProjectClause, env: dict[str, ValueType]

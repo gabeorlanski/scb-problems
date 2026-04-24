@@ -5,14 +5,12 @@
 
 from __future__ import annotations
 
-
 import bz2
 import gzip
 import json
 from collections.abc import Sequence
 from dataclasses import dataclass
-from pathlib import Path
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import yaml

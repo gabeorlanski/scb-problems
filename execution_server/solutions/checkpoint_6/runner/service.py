@@ -5,23 +5,18 @@
 
 from __future__ import annotations
 
-
 import uuid
 from dataclasses import replace
 from typing import Any
 
-from .cache import ExecutionResultCache
-from .cache import build_cache_key
-from .environments import ConcurrencyMode
-from .environments import EnvironmentManager
+from .cache import ExecutionResultCache, build_cache_key
+from .environments import ConcurrencyMode, EnvironmentManager
 from .executor import execute_command
 from .file_writer import FileMaterializationError
 from .models import ExecutionResult
 from .stats import ExecutionStats
-from .utils import EXECUTION_ROUND_PLACES
-from .utils import round_duration
-from .validation import ValidationError
-from .validation import validate_execution_payload
+from .utils import EXECUTION_ROUND_PLACES, round_duration
+from .validation import ValidationError, validate_execution_payload
 
 
 class ExecutionService:

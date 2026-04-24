@@ -11,13 +11,9 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from helpers import assert_error_payload
-from helpers import assert_scalar_signals
-from helpers import assert_vector_signal
-from helpers import parse_outputs
-from helpers import run_command
-from helpers import run_json_command
-from helpers import write_circ
+from helpers import (assert_error_payload, assert_scalar_signals,
+                     assert_vector_signal, parse_outputs, run_command,
+                     run_json_command, write_circ)
 
 
 def write_json_circuit(tmp_path: Path, name: str, data: dict) -> Path:
@@ -206,9 +202,8 @@ def test_cross_format_eval_smoke(
     expected: tuple[str, str, str, str, str],
 ) -> None:
     """Evaluate the same circuit in circ/json/bench with key cases."""
-    from novel_circuits import SHARED_SCALAR_BENCH
-    from novel_circuits import SHARED_SCALAR_CIRC
-    from novel_circuits import SHARED_SCALAR_JSON
+    from novel_circuits import (SHARED_SCALAR_BENCH, SHARED_SCALAR_CIRC,
+                                SHARED_SCALAR_JSON)
 
     circ_path = write_circ(tmp_path, "shared.circ", SHARED_SCALAR_CIRC)
     json_path = write_json_circuit(tmp_path, "shared.json", SHARED_SCALAR_JSON)

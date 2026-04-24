@@ -5,14 +5,11 @@
 
 from __future__ import annotations
 
-
 import math
 import sys
 
 import pandas as pd
-from models import ItemInfo
-from models import Material
-from models import RecipeInfo
+from models import ItemInfo, Material, RecipeInfo
 from sde_loader import SDELoader
 
 

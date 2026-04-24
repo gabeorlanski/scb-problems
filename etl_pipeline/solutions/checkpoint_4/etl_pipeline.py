@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 import argparse
 import json
 import sys
@@ -49,6 +48,16 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         response = {"status": "ok", "data": data, "metrics": metrics}
     else:
+        dataset = payload.get("dataset", [])
+        try:
+            execute_pipeline(
+                normalized["steps"],
+                dataset,
+                normalized.get("defs", {}),
+            )
+        except ETLError as error:
+            _emit_error(error)
+            return 1
         response = {"status": "ok", "normalized": normalized}
 
     sys.stdout.write(json.dumps(response, separators=(",", ":")))

@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 import json
 from collections import defaultdict
 from collections.abc import Iterable
@@ -77,10 +76,7 @@ class ColumnStats:
         if not self.has_value:
             return "string"
         if mode == "strict":
-            result = self.strict_type or "string"
-            if result == "date" and self.any_timestamp:
-                return "timestamp"
-            return result
+            return self.strict_type or "string"
         if self.all_bool:
             return "bool"
         if self.all_int:
@@ -221,7 +217,6 @@ def _reduce_types(types: Iterable[str]) -> str:
 
 
 def _detect_value_type(value: str) -> str:
-    lower_text = value.strip().lower()
     if type_utils.parse_bool(value) is not None:
         return "bool"
     if type_utils.parse_int(value) is not None:
@@ -245,6 +240,4 @@ def _join_types(left: str | None, right: str) -> str:
     pair = {left, right}
     if pair <= {"int", "float"}:
         return "float"
-    if pair <= {"date", "timestamp"}:
-        return "timestamp"
     return "string"

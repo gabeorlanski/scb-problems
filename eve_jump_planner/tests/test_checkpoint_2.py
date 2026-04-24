@@ -124,6 +124,7 @@ SUMMARY:
 }
 
 
+@pytest.mark.functionality
 @pytest.mark.parametrize(
     "case",
     TURNUR_AHB_CLOAK["cases"],

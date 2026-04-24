@@ -16,8 +16,7 @@ from http.server import ThreadingHTTPServer
 
 import config_server
 from config_service.policies import PolicyManager
-from config_service.schema_registry import BindingStore
-from config_service.schema_registry import SchemaRegistry
+from config_service.schema_registry import BindingStore, SchemaRegistry
 from config_service.store import ConfigStore
 
 

@@ -1,0 +1,2 @@
+entrypoint: boundary
+tol: 0.001

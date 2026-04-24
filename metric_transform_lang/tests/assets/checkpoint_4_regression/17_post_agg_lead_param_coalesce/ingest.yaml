@@ -2,7 +2,6 @@ sources:
   - name: main
     inputs:
       - "input.csv"
-      - "UTC"
     format: auto
     schema: WebSale
     precedence: 10

@@ -1,1 +1,1 @@
---dsl pipeline.mtl --ingest-config ingest.yaml
+--dsl pipeline.mtl --ingest-config ingest.yaml --param min_qty=3.0

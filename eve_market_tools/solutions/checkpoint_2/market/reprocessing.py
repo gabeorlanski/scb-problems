@@ -9,13 +9,11 @@ yields, handling portion sizes, leftovers, and drill-down reprocessing.
 
 from __future__ import annotations
 
-
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from .classification import ItemClassifier
-from .classification import ItemType
+from .classification import ItemClassifier, ItemType
 
 if TYPE_CHECKING:
     from .sde import SDERepository

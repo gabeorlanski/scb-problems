@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 import json
 from dataclasses import dataclass
 from typing import Any
@@ -257,7 +256,7 @@ class UnaryNode(Node):
 
     def evaluate(self, row: dict, params: dict[str, Any] | None = None) -> Any:
         value = self.operand.evaluate(row, params)
-        if self.operator == "!":
+        if self.operator in {"!", "not"}:
             return not _to_bool(value)
         if self.operator == "-":
             if not _is_number(value):
@@ -273,7 +272,7 @@ class BinaryNode(Node):
     right: Node
 
     def evaluate(self, row: dict, params: dict[str, Any] | None = None) -> Any:
-        if self.operator in {"&&", "||"}:
+        if self.operator in {"&&", "||", "and", "or"}:
             return self._evaluate_logical(row, params)
 
         left_value = self.left.evaluate(row, params)
@@ -290,7 +289,7 @@ class BinaryNode(Node):
     def _evaluate_logical(
         self, row: dict, params: dict[str, Any] | None
     ) -> bool:
-        if self.operator == "&&":
+        if self.operator in {"&&", "and"}:
             left_bool = _to_bool(self.left.evaluate(row, params))
             if not left_bool:
                 return False
@@ -345,7 +344,12 @@ class Parser:
 
     def _parse_or(self) -> Node:
         node = self._parse_and()
-        while (token := self._match("OP", "||")) is not None:
+        while True:
+            token = self._match("OP", "||")
+            if token is None:
+                token = self._match("IDENT", "or")
+            if token is None:
+                break
             node = BinaryNode(
                 operator=token.value, left=node, right=self._parse_and()
             )
@@ -353,7 +357,12 @@ class Parser:
 
     def _parse_and(self) -> Node:
         node = self._parse_equality()
-        while (token := self._match("OP", "&&")) is not None:
+        while True:
+            token = self._match("OP", "&&")
+            if token is None:
+                token = self._match("IDENT", "and")
+            if token is None:
+                break
             node = BinaryNode(
                 operator=token.value, left=node, right=self._parse_equality()
             )
@@ -396,6 +405,9 @@ class Parser:
         if token.kind == "OP" and token.value in {"!", "-"}:
             self._advance()
             return UnaryNode(operator=token.value, operand=self._parse_unary())
+        if token.kind == "IDENT" and token.value == "not":
+            self._advance()
+            return UnaryNode(operator="not", operand=self._parse_unary())
         if token.kind == "LPAREN":
             return self._parse_grouping()
         return self._parse_primary()

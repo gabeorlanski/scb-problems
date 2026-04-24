@@ -1,0 +1,73 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--detailed"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "Scenario",
+              "",
+              ""
+            ]
+          ]
+        },
+        "Scenario_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "D4",
+              "",
+              "Scenario Eval",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "Scenario": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2",
+              "comment": "{\"rule\": {\"kind\": \"scenario\", \"points\": 3}, \"scenarios\": {\"case_a\": {\"input\": {\"A1\": 2, \"A2\": 3}, \"output\": 5}, \"case_b\": {\"input\": {\"A1\": 3, \"A2\": 4}, \"output\": 7}}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "Scenario": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2"
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_contains": [
+      "PASS: Scenario Eval.case_a",
+      "PASS: Scenario Eval.case_b",
+      "Total: 2 / 2 passed"
+    ]
+  }
+}

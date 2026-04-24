@@ -15,8 +15,9 @@ from fractions import Fraction
 from pathlib import Path
 
 import pytest
-from deepdiff import DeepDiff
 import yaml
+from deepdiff import DeepDiff
+
 # =============================================================================
 # Pytest Configuration
 # =============================================================================

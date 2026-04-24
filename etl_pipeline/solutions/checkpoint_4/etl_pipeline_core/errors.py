@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 from dataclasses import dataclass
 
 ERROR_PREFIX = "ETL_ERROR: "

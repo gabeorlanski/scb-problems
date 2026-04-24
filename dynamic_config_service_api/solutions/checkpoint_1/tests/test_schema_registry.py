@@ -9,8 +9,7 @@ from __future__ import annotations
 import unittest
 
 from config_service import errors
-from config_service.schema_registry import BindingStore
-from config_service.schema_registry import SchemaRegistry
+from config_service.schema_registry import BindingStore, SchemaRegistry
 
 
 class SchemaRegistryTests(unittest.TestCase):

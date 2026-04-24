@@ -1,0 +1,2 @@
+entrypoint: approx_pi
+tol: 0.001

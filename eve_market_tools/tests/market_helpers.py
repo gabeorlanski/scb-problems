@@ -30,7 +30,9 @@ class OutlierThresholds:
     sell_threshold: float | None
 
 
-def compute_outlier_thresholds(orders: pd.DataFrame) -> dict[int, OutlierThresholds]:
+def compute_outlier_thresholds(
+    orders: pd.DataFrame,
+) -> dict[int, OutlierThresholds]:
     """Compute per-type outlier thresholds from order data."""
     if orders.empty:
         return {}
@@ -44,10 +46,14 @@ def compute_outlier_thresholds(orders: pd.DataFrame) -> dict[int, OutlierThresho
         sell_price = float(sells["price"].min()) if not sells.empty else None
 
         buy_threshold = (
-            buy_price * OUTLIER_BUY_MULTIPLIER if buy_price is not None else None
+            buy_price * OUTLIER_BUY_MULTIPLIER
+            if buy_price is not None
+            else None
         )
         sell_threshold = (
-            sell_price * OUTLIER_SELL_MULTIPLIER if sell_price is not None else None
+            sell_price * OUTLIER_SELL_MULTIPLIER
+            if sell_price is not None
+            else None
         )
 
         thresholds[int(type_id)] = OutlierThresholds(
@@ -93,21 +99,35 @@ def weighted_top_percent(
     is_buy: bool,
     percent: float = TOP_PERCENT,
 ) -> float | None:
-    """Calculate volume-weighted average price of top N% of orders by count."""
+    """Calculate top-price VWAP across the first N% of remaining volume."""
     if orders.empty:
         return None
 
-    n = len(orders)
-    top_n = max(1, math.ceil(percent * n))
-
     sorted_df = orders.sort_values("price", ascending=not is_buy)
-    top_slice = sorted_df.head(top_n)
+    total_volume = float(sorted_df["volume_remain"].sum())
+    if total_volume == 0:
+        return float(sorted_df["price"].mean())
 
-    vol = top_slice["volume_remain"]
-    if vol.sum() == 0:
-        return float(top_slice["price"].mean())
+    target_volume = total_volume * percent
+    if target_volume <= 0:
+        return float(sorted_df["price"].mean())
 
-    return float((top_slice["price"] * vol).sum() / vol.sum())
+    accumulated_volume = 0.0
+    accumulated_value = 0.0
+    for order in sorted_df.itertuples(index=False):
+        remaining = target_volume - accumulated_volume
+        if remaining <= 0:
+            break
+        volume = min(float(order.volume_remain), remaining)
+        if volume <= 0:
+            continue
+        accumulated_volume += volume
+        accumulated_value += volume * float(order.price)
+
+    if accumulated_volume == 0:
+        return None
+
+    return float(accumulated_value / accumulated_volume)
 
 
 def filter_to_hubs(
@@ -117,7 +137,9 @@ def filter_to_hubs(
     if hubs is None:
         hubs = list(HUB_LOCATIONS.keys())
 
-    location_ids = [HUB_LOCATIONS[h.lower()] for h in hubs if h.lower() in HUB_LOCATIONS]
+    location_ids = [
+        HUB_LOCATIONS[h.lower()] for h in hubs if h.lower() in HUB_LOCATIONS
+    ]
     return orders_df[orders_df["location_id"].isin(location_ids)].copy()
 
 
@@ -150,8 +172,12 @@ def get_5pct_prices(
         if thresh.sell_threshold is not None:
             sells = sells[sells["price"] <= thresh.sell_threshold]
 
-    buy_5pct = weighted_top_percent(buys, is_buy=True) if not buys.empty else None
-    sell_5pct = weighted_top_percent(sells, is_buy=False) if not sells.empty else None
+    buy_5pct = (
+        weighted_top_percent(buys, is_buy=True) if not buys.empty else None
+    )
+    sell_5pct = (
+        weighted_top_percent(sells, is_buy=False) if not sells.empty else None
+    )
 
     return buy_5pct, sell_5pct
 
@@ -175,9 +201,11 @@ def get_hub_prices(
 def get_best_sell_5pct(
     orders_df: pd.DataFrame,
     type_id: int,
+    hubs: list[str] | None = None,
 ) -> float | None:
-    """Get sell_5pct from the first available hub (jita, amarr, dodixie, rens, hek)."""
-    for hub_name in ["jita", "amarr", "dodixie", "rens", "hek"]:
+    """Get sell_5pct from the first available hub in the provided priority list."""
+    hub_priority = hubs or ["jita", "amarr", "dodixie", "rens", "hek"]
+    for hub_name in hub_priority:
         _, sell_5pct = get_5pct_prices(orders_df, type_id, [hub_name])
         if sell_5pct is not None:
             return sell_5pct
@@ -432,7 +460,9 @@ def compute_reprocess_item_profit(
         max_price = max(max_price, order_price)
         remaining -= take
 
-    actual_qty = processable_qty - remaining if remaining < 0 else processable_qty
+    actual_qty = (
+        processable_qty - remaining if remaining < 0 else processable_qty
+    )
 
     # Calculate yields
     yields = get_reprocess_yields(
@@ -464,22 +494,26 @@ def compute_reprocess_item_profit(
     }
 
 
-def get_best_buy_price(orders_df: pd.DataFrame, type_id: int, hub: str) -> float | None:
+def get_best_buy_price(
+    orders_df: pd.DataFrame, type_id: int, hub: str
+) -> float | None:
     """Get best (highest) buy price in a hub for a type."""
     hub_orders = filter_to_hubs(orders_df, [hub])
     buys = hub_orders[
-        (hub_orders["type_id"] == type_id) & (hub_orders["is_buy_order"] == True)
+        (hub_orders["type_id"] == type_id) & hub_orders["is_buy_order"]
     ]
     if buys.empty:
         return None
     return float(buys["price"].max())
 
 
-def get_best_sell_price(orders_df: pd.DataFrame, type_id: int, hub: str) -> float | None:
+def get_best_sell_price(
+    orders_df: pd.DataFrame, type_id: int, hub: str
+) -> float | None:
     """Get best (lowest) sell price in a hub for a type."""
     hub_orders = filter_to_hubs(orders_df, [hub])
     sells = hub_orders[
-        (hub_orders["type_id"] == type_id) & (hub_orders["is_buy_order"] == False)
+        (hub_orders["type_id"] == type_id) & (~hub_orders["is_buy_order"])
     ]
     if sells.empty:
         return None
@@ -518,7 +552,9 @@ def compute_daily_stats(
     return avg_daily_value, avg_daily_volume
 
 
-def is_valid_4_sig_digit_price(price: float, reference_price: float, direction: str) -> bool:
+def is_valid_4_sig_digit_price(
+    price: float, reference_price: float, direction: str
+) -> bool:
     """Check if price is a valid 4 significant digit deviation from reference.
 
     Per spec: "Order prices can deviate at most 4 sig digits from nearest order.

@@ -8,11 +8,9 @@ from __future__ import annotations
 
 import json
 import subprocess
-from collections.abc import Callable
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
-
 
 JsonMap = dict[str, Any]
 JsonList = list[JsonMap]

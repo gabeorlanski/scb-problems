@@ -1,0 +1,72 @@
+{
+  "case": {
+    "args": [],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "Ref",
+              "",
+              ""
+            ]
+          ]
+        },
+        "Ref_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "C3",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "Ref": {
+          "cells": {
+            "C3": {
+              "formula": "=A1+B1",
+              "comment": "{\"rule\": {\"kind\": \"reference\", \"points\": 5}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "Ref": {
+          "cells": {
+            "C3": {
+              "value": 30
+            },
+            "A1": {
+              "value": 10
+            },
+            "B1": {
+              "value": 20
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_exact": "Assignment Score: 5 / 5\n"
+  }
+}

@@ -10,7 +10,6 @@ region mappings used in market analysis.
 
 from __future__ import annotations
 
-
 import bz2
 import csv
 from collections.abc import Iterable

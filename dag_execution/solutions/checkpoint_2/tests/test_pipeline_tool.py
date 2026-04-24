@@ -13,11 +13,9 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from pipeline_tool.errors import CacheError
-from pipeline_tool.errors import PipelineSyntaxError
+from pipeline_tool.errors import CacheError, PipelineSyntaxError
 from pipeline_tool.executor import TaskExecutor
-from pipeline_tool.models import CacheRuntimeConfig
-from pipeline_tool.models import TaskInvocation
+from pipeline_tool.models import CacheRuntimeConfig, TaskInvocation
 from pipeline_tool.pipeline_parser import parse_pipeline_file
 
 PIPELINE_TEMPLATE = """

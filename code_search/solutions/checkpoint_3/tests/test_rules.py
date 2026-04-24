@@ -10,8 +10,7 @@ from pathlib import Path
 
 from code_searcher.exceptions import RulesValidationError
 from code_searcher.languages import SUPPORTED_LANGUAGES
-from code_searcher.rules import Rule
-from code_searcher.rules import load_rules
+from code_searcher.rules import Rule, load_rules
 
 
 class LoadRulesTests(unittest.TestCase):

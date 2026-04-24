@@ -5,10 +5,8 @@
 
 from __future__ import annotations
 
-
 import re
-from collections.abc import Callable
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 from .errors import ETLError

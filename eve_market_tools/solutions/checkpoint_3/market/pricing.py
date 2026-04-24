@@ -9,13 +9,9 @@ and value formatting utilities.
 
 from __future__ import annotations
 
-
-import math
-
 import pandas as pd
 
-from .config import DEFAULT_CONFIG
-from .config import MarketConfig
+from .config import DEFAULT_CONFIG, MarketConfig
 
 
 class PriceCalculator:
@@ -29,8 +25,9 @@ class PriceCalculator:
     ) -> float | None:
         """Calculate volume-weighted average price of top N% of orders (unrounded).
 
-        Takes the top N% of orders by count (sorted by price) and computes
-        a volume-weighted average price.
+        Takes the best-priced orders until reaching the top N% of remaining
+        order volume, then computes a volume-weighted average with partial
+        boundary-order fill.
 
         Args:
             orders: DataFrame with order data.
@@ -43,17 +40,32 @@ class PriceCalculator:
         if orders.empty:
             return None
 
-        n = len(orders)
-        top_n = max(1, math.ceil(self.config.price.top_percent_volume * n))
-
         sorted_df = orders.sort_values("price", ascending=not is_buy)
-        top_slice = sorted_df.head(top_n)
+        total_volume = float(sorted_df["volume_remain"].sum())
+        if total_volume <= 0:
+            return float(sorted_df["price"].mean())
 
-        vol = top_slice["volume_remain"]
-        if vol.sum() == 0:
-            return float(top_slice["price"].mean())
+        target_volume = total_volume * self.config.price.top_percent_volume
+        if target_volume <= 0:
+            return float(sorted_df["price"].mean())
 
-        return float((top_slice["price"] * vol).sum() / vol.sum())
+        accumulated_volume = 0.0
+        accumulated_value = 0.0
+
+        for order in sorted_df.itertuples(index=False):
+            remaining_volume = target_volume - accumulated_volume
+            if remaining_volume <= 0:
+                break
+            fill_volume = min(float(order.volume_remain), remaining_volume)
+            if fill_volume <= 0:
+                continue
+            accumulated_volume += fill_volume
+            accumulated_value += fill_volume * float(order.price)
+
+        if accumulated_volume <= 0:
+            return None
+
+        return float(accumulated_value / accumulated_volume)
 
     def weighted_top_percent(
         self, orders: pd.DataFrame, *, is_buy: bool, precision: int = 2

@@ -1,0 +1,2 @@
+entrypoint: get_string_float
+tol: 0.1

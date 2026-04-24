@@ -10,8 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from runner.file_writer import FileMaterializationError
-from runner.file_writer import materialize_files
+from runner.file_writer import FileMaterializationError, materialize_files
 
 
 class FileWriterTests(unittest.TestCase):

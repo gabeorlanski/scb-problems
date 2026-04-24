@@ -70,45 +70,59 @@ class DestinationStore:
 
 def evaluate_due_jobs(
     schedule: Schedule, now_utc: datetime, duration_hours: int
-) -> dict[str, datetime | None]:
+) -> dict[str, list[datetime]]:
     """Return per-job due timestamps (tz-aware) within the simulation window."""
     if duration_hours < 0:
         raise ValueError("duration_hours must be non-negative.")
-    window_end = now_utc + timedelta(hours=duration_hours)
 
-    due_map: dict[str, datetime | None] = {}
+    window_start = now_utc.replace(second=0, microsecond=0)
+    window_end = (now_utc + timedelta(hours=duration_hours)).replace(
+        second=0,
+        microsecond=0,
+    )
+
+    due_map: dict[str, list[datetime]] = {}
     for job in schedule.jobs:
-        due_map[job.job_id] = _compute_due_local(
-            job, now_utc, window_end, schedule
+        due_map[job.job_id] = _compute_due_locals(
+            job,
+            window_start,
+            window_end,
+            schedule,
         )
     return due_map
 
 
-def _compute_due_local(
-    job: Job, now_utc: datetime, window_end_utc: datetime, schedule: Schedule
-) -> datetime | None:
+def _compute_due_locals(
+    job: Job,
+    window_start_utc: datetime,
+    window_end_utc: datetime,
+    schedule: Schedule,
+) -> list[datetime]:
     if not job.enabled:
-        return None
+        return []
 
     when = job.when
     tz = schedule.timezone
 
     if when.kind == "once":
         if when.once_at is None:
-            return None
-        candidate_local = when.once_at.astimezone(tz)
+            return []
+        candidate_local = when.once_at.astimezone(tz).replace(
+            second=0,
+            microsecond=0,
+        )
         candidate_utc = candidate_local.astimezone(UTC)
-        if now_utc <= candidate_utc <= window_end_utc:
-            return candidate_local
-        return None
+        if window_start_utc <= candidate_utc <= window_end_utc:
+            return [candidate_local]
+        return []
 
     if when.time_of_day is None:
-        return None
+        return []
 
-    start_local = now_utc.astimezone(tz)
+    start_local = window_start_utc.astimezone(tz)
     end_local = window_end_utc.astimezone(tz)
-    days_delta = (end_local.date() - start_local.date()).days
-    days_delta = max(days_delta, 0)
+    days_delta = max((end_local.date() - start_local.date()).days, 0)
+    due_locals: list[datetime] = []
 
     for offset in range(days_delta + 1):
         current_date = start_local.date() + timedelta(days=offset)
@@ -119,10 +133,10 @@ def _compute_due_local(
             if candidate_local.weekday() not in when.days:
                 continue
         candidate_utc = candidate_local.astimezone(UTC)
-        if now_utc <= candidate_utc <= window_end_utc:
-            return candidate_local
+        if window_start_utc <= candidate_utc <= window_end_utc:
+            due_locals.append(candidate_local)
 
-    return None
+    return due_locals
 
 
 def iterate_files(root: Path) -> list[str]:

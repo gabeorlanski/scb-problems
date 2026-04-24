@@ -15,6 +15,7 @@ from typing import Any
 from .aggregates import create_aggregate_state
 from .aggregates import resolve_group_value
 from .ast import AmongstPredicate
+from .ast import CanonicalRef
 from .ast import ComparisonPredicate
 from .ast import ConflationClause
 from .ast import ExistsPredicate
@@ -27,6 +28,7 @@ from .ast import ScalarSubqueryExpr
 from .ast import SelectQuery
 from .ast import TableSubqueryExpr
 from .ast import ValueExpr
+from .ast import ValueRef
 from .errors import IOExecutionError
 from .errors import RuntimeExecutionError
 from .errors import SemanticError
@@ -120,11 +122,13 @@ class QueryEngine:
         existing_aliases: Sequence[str],
     ) -> list[RowContext]:
         result: list[RowContext] = []
+        matched_rows: list[RowContext] = []
+        unmatched_left_rows: list[RowContext] = []
         matched_indices: set[int] = set()
         new_alias = clause.alias
         new_records = self.sources[new_alias].records
         for row in rows:
-            matches: list[tuple[int, dict | None]] = []
+            matches: list[tuple[int, dict]] = []
             for idx, candidate in enumerate(new_records):
                 if self._join_predicates_match(
                     clause.predicates, row, new_alias, candidate, gloss, outer
@@ -135,11 +139,20 @@ class QueryEngine:
                     matched_indices.add(idx)
                     new_row = dict(row)
                     new_row[new_alias] = candidate
-                    result.append(new_row)
+                    if clause.flavor == "BOTH":
+                        matched_rows.append(new_row)
+                    else:
+                        result.append(new_row)
             elif clause.flavor in {"LEFT", "BOTH"}:
                 new_row = dict(row)
                 new_row[new_alias] = None
-                result.append(new_row)
+                if clause.flavor == "BOTH":
+                    unmatched_left_rows.append(new_row)
+                else:
+                    result.append(new_row)
+        if clause.flavor == "BOTH":
+            result = list(matched_rows)
+            result.extend(unmatched_left_rows)
         if clause.flavor in {"RIGHT", "BOTH"}:
             template = dict.fromkeys(existing_aliases)
             for idx, candidate in enumerate(new_records):
@@ -293,9 +306,10 @@ class QueryEngine:
     def _compare_values(self, left: Any, right: Any, operator: str) -> bool:
         if operator in {"<", "<=", ">", ">="}:
             return self._compare_ordered(left, right, operator)
-        if operator in {"=", "!="}:
-            equals = self._values_equal(left, right)
-            return equals if operator == "=" else not equals
+        if operator == "=":
+            return self._values_equal(left, right)
+        if operator == "!=":
+            return self._values_not_equal(left, right)
         raise RuntimeExecutionError(f"unsupported operator '{operator}'")
 
     def _values_equal(self, left: Any, right: Any) -> bool:
@@ -307,6 +321,17 @@ class QueryEngine:
             return structural_equal(left, right)
         return left == right
 
+    def _values_not_equal(self, left: Any, right: Any) -> bool:
+        if right is None:
+            return self._is_scalar(left)
+        if left is None:
+            return False
+        if not self._types_match(left, right):
+            return False
+        if isinstance(left, (list, dict)):
+            return not structural_equal(left, right)
+        return left != right
+
     def _types_match(self, left: Any, right: Any) -> bool:
         if left is None or right is None:
             return left is None and right is None
@@ -315,6 +340,9 @@ class QueryEngine:
         if is_number(left) or is_number(right):
             return is_number(left) and is_number(right)
         return type(left) is type(right)
+
+    def _is_scalar(self, value: Any) -> bool:
+        return is_number(value) or isinstance(value, (str, bool))
 
     def _compare_ordered(self, left: Any, right: Any, operator: str) -> bool:
         if isinstance(left, str) and isinstance(right, str):
@@ -402,6 +430,10 @@ class AggregationEngine:
         self.engine = engine
         self.outer = outer
         self.group_by = query.group_by
+        self.group_index = {
+            self._group_ref_key(field): idx
+            for idx, field in enumerate(self.group_by)
+        }
         self.aggregate_indices = [
             idx
             for idx, item in enumerate(query.select_items)
@@ -417,8 +449,9 @@ class AggregationEngine:
     def run(self, rows: Iterable[RowContext]) -> list[dict]:
         for row in rows:
             eval_ctx = EvalContext(row, self.gloss, self.outer)
-            key = self._group_key(eval_ctx)
-            state = self._get_or_create_state(key, eval_ctx)
+            group_values = self._group_values(eval_ctx)
+            key = self._group_key(group_values)
+            state = self._get_or_create_state(key, eval_ctx, group_values)
             for agg_state in state["aggregates"].values():
                 agg_state.add(eval_ctx)
         results: list[dict] = []
@@ -429,28 +462,38 @@ class AggregationEngine:
             results.append(self._build_row(()))
         return results
 
-    def _group_key(self, context: EvalContext) -> tuple[tuple[Any, ...], ...]:
+    def _group_values(self, context: EvalContext) -> tuple[Any, ...]:
         if not self.group_by:
             return ()
-        values: list[tuple[Any, ...]] = []
-        for field in self.group_by:
-            raw_value = resolve_group_value(field, context, self.gloss)
-            values.append(structural_signature(raw_value))
-        return tuple(values)
+        return tuple(
+            resolve_group_value(field, context, self.gloss)
+            for field in self.group_by
+        )
+
+    def _group_key(
+        self, group_values: tuple[Any, ...]
+    ) -> tuple[tuple[Any, ...], ...]:
+        return tuple(structural_signature(value) for value in group_values)
 
     def _get_or_create_state(
-        self, key: tuple[Any, ...], sample_ctx: EvalContext
+        self,
+        key: tuple[Any, ...],
+        sample_ctx: EvalContext,
+        group_values: tuple[Any, ...],
     ) -> dict[str, Any]:
         if key not in self.groups:
-            self.groups[key] = self._create_group_state()
+            self.groups[key] = self._create_group_state(group_values)
             self.groups[key]["sample"] = sample_ctx
             self.order.append(key)
         elif "sample" not in self.groups[key]:
             self.groups[key]["sample"] = sample_ctx
         return self.groups[key]
 
-    def _create_group_state(self) -> dict[str, Any]:
+    def _create_group_state(
+        self, group_values: tuple[Any, ...] = ()
+    ) -> dict[str, Any]:
         return {
+            "values": group_values,
             "aggregates": {
                 idx: create_aggregate_state(
                     self.query.select_items[idx].aggregate, self.gloss
@@ -467,7 +510,32 @@ class AggregationEngine:
             if item.aggregate:
                 row[item.output_name] = state["aggregates"][idx].result()
             elif item.value is not None and sample_ctx is not None:
+                if self.group_by and isinstance(
+                    item.value, (FieldRef, CanonicalRef)
+                ):
+                    row[item.output_name] = self._group_value_for_ref(
+                        key, item.value
+                    )
+                    continue
                 row[item.output_name] = self.engine._evaluate_value_expr(
                     item.value, sample_ctx
                 )
         return row
+
+    def _group_value_for_ref(self, key: tuple[Any, ...], ref: ValueRef) -> Any:
+        lookup = self._group_ref_key(ref)
+        if lookup not in self.group_index:
+            raise RuntimeExecutionError(
+                f"field '{ref.text}' missing from GROUP BY"
+            )
+        state = self.groups.get(key)
+        if state is None:
+            return None
+        return state["values"][self.group_index[lookup]]
+
+    @staticmethod
+    def _group_ref_key(ref: ValueRef) -> tuple[str, tuple[str, ...]]:
+        if isinstance(ref, FieldRef):
+            alias = ref.alias or ""
+            return ("FIELD", (alias, *ref.parts))
+        return ("CANON", (ref.name,))

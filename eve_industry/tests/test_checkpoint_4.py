@@ -9,17 +9,9 @@ import csv
 from pathlib import Path
 
 import pytest
-
-from conftest import (
-    create_config_file,
-    load_csv_jobs,
-    load_csv_materials,
-    normalize_csv_jobs,
-    normalize_csv_materials,
-    parse_csv_file,
-    run_command,
-    load_build_string,
-)
+from conftest import (create_config_file, load_build_string, load_csv_jobs,
+                      load_csv_materials, normalize_csv_jobs,
+                      normalize_csv_materials, parse_csv_file, run_command)
 
 
 def parse_output_csv(filepath: Path) -> list[dict]:

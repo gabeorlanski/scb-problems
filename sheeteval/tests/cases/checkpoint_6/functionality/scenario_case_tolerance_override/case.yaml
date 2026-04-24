@@ -1,0 +1,49 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--detailed"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            ["name"],
+            ["ScenarioTol"]
+          ]
+        },
+        "ScenarioTol_Checklist": {
+          "rows": [
+            ["number", "flags", "check-name", "expected-outcome", "fail-message", "expected-points"],
+            ["D4", "", "Tolerance Scenario", "", "", ""]
+          ]
+        },
+        "ScenarioTol": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2",
+              "comment": "{\"rule\": {\"kind\": \"scenario\", \"points\": 3}, \"scenarios\": {\"strict\": {\"input\": {\"A1\": 2, \"A2\": 3}, \"output\": 5.1}, \"override\": {\"input\": {\"A1\": 2, \"A2\": 3}, \"output\": 5.1, \"tolerance\": 0.2}}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "ScenarioTol": {
+          "cells": {
+            "D4": {"formula": "=A1+A2"}
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_contains": [
+      "FAIL: Tolerance Scenario.strict",
+      "PASS: Tolerance Scenario.override",
+      "Total: 1 / 2 passed"
+    ]
+  }
+}

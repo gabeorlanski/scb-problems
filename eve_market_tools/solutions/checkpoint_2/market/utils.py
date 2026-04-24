@@ -9,10 +9,8 @@ and volume-weighted price calculations.
 
 from __future__ import annotations
 
-
 import gzip
-from datetime import UTC
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 def parse_iso8601(value: str) -> datetime:

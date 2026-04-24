@@ -5,11 +5,7 @@
 
 from __future__ import annotations
 
-
-from models import ItemInfo
-from models import RecipeInfo
-from models import T2InventionData
-from models import T3InventionData
+from models import ItemInfo, RecipeInfo, T2InventionData, T3InventionData
 
 
 def format_volume(volume: float) -> str:

@@ -1,0 +1,73 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--html-file",
+      "{html_file}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name"
+            ],
+            [
+              "ScenarioHtml"
+            ]
+          ]
+        },
+        "ScenarioHtml_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "D4",
+              "",
+              "Scenario Eval",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "ScenarioHtml": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2",
+              "comment": "{\"rule\": {\"kind\": \"scenario\", \"points\": 3}, \"scenarios\": {\"case_a\": {\"input\": {\"A1\": 2, \"A2\": 3}, \"output\": 5}, \"case_b\": {\"input\": {\"A1\": 3, \"A2\": 4}, \"output\": 7}}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "ScenarioHtml": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2"
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_exact": "Total: 2 / 2 passed\n",
+    "stderr_absent": true,
+    "html_contains": [
+      "Scenario Eval.case_a",
+      "Scenario Eval.case_b",
+      "<p class=\"subtotal\">ScenarioHtml: 2 / 2 passed</p>",
+      "<p class=\"total\">Total: 2 / 2 passed</p>"
+    ]
+  }
+}

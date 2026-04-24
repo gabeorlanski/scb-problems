@@ -9,21 +9,14 @@ with SDE data, and defines endpoints for price ingestion and market queries.
 
 from __future__ import annotations
 
-
 from pathlib import Path
 from typing import Any
 
-from fastapi import Body
-from fastapi import FastAPI
-from fastapi import HTTPException
-from fastapi import Query
-from fastapi import Request
+from fastapi import Body, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
-from .errors import InvalidColumnsError
-from .errors import InvalidModeError
-from .errors import InvalidPayloadError
-from .errors import RegionNotFoundError
+from .errors import (InvalidColumnsError, InvalidModeError,
+                     InvalidPayloadError, RegionNotFoundError)
 from .models import UnknownItemsError
 from .sde import SDERepository
 from .service import MarketService

@@ -1,0 +1,63 @@
+{
+  "case": {
+    "args": [
+      "--report-file",
+      "{report_file}",
+      "--score-file",
+      "{tmp}",
+      "--html-file",
+      "{html_file}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            ["name"],
+            ["WriteOrder"]
+          ]
+        },
+        "WriteOrder_Checklist": {
+          "rows": [
+            ["number", "flags", "check-name", "expected-outcome", "fail-message", "expected-points"],
+            ["B2", "", "", "", "", ""]
+          ]
+        },
+        "WriteOrder": {
+          "cells": {
+            "B2": {
+              "value": 9,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 2}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "WriteOrder": {
+          "cells": {
+            "B2": {"value": 9}
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 1,
+    "stderr_contains": [
+      "Error"
+    ],
+    "files": [
+      {
+        "path": "report.txt",
+        "contains": [
+          "Total: 2 / 2"
+        ]
+      },
+      {
+        "path": "report.html",
+        "exists": false
+      }
+    ]
+  }
+}

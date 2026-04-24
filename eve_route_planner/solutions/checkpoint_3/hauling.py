@@ -11,11 +11,9 @@ import json
 import math
 import os
 import sys
-from collections.abc import Callable
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from decimal import ROUND_HALF_EVEN
-from decimal import Decimal
+from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Any
 
 import yaml
@@ -979,6 +977,7 @@ class ManifestPlanner:
         route_planner: RoutePlanner,
         move_cargo: float,
         cargo_capacity: float,
+        start_cargo: float = 0.0,
     ) -> None:
         self.route_planner = route_planner
         self.nodes_by_system = nodes_by_system
@@ -987,6 +986,7 @@ class ManifestPlanner:
         self.move_cargo = move_cargo
         self.cargo_capacity = cargo_capacity
         self.supplies = supplies
+        self.start_cargo = start_cargo
         self.current_state = State(
             node_id=start_node_id, lock_from=None, lock_expiry=0.0
         )
@@ -1009,10 +1009,33 @@ class ManifestPlanner:
         return max(0.0, self.cargo_capacity - self.cargo_onboard)
 
     def has_supplies(self) -> bool:
-        return total_cargo_remaining(self.supplies) > 0
+        return (
+            total_cargo_remaining(self.supplies) > 0
+            or self.start_cargo > 1e-9
+        )
 
     def has_work(self) -> bool:
         return self.has_supplies() or self.cargo_onboard > 1e-9
+
+    def load_start_cargo_if_local_only(self) -> None:
+        """Load start_cargo as a separate op when all remaining cargo is local."""
+        if self.start_cargo <= 1e-9:
+            return
+        all_local = all(
+            node_id == self.current_state.node_id
+            for node_id in self.supplies.keys()
+        )
+        if not all_local and self.supplies:
+            self.supplies[self.current_state.node_id] = (
+                self.supplies.get(self.current_state.node_id, 0.0)
+                + self.start_cargo
+            )
+            self.start_cargo = 0.0
+            return
+        load_amount = min(self.remaining_capacity(), self.start_cargo)
+        if load_amount > 1e-9:
+            self.load_here(load_amount)
+            self.start_cargo -= load_amount
 
     def add_trip_header_if_needed(self) -> None:
         if self.trip_number > 1 and (
@@ -1217,7 +1240,9 @@ class ManifestPlanner:
             self.travel_to_next_supply()
 
     def run(self) -> tuple[list[str], float, float]:
-        if not self.has_supplies():
+        self.load_start_cargo_if_local_only()
+
+        if not self.has_supplies() and self.cargo_onboard <= 1e-9:
             self.travel_to_destination()
             self.lines.append(f"DONE: {format_time(self.current_time)}")
             return self.lines, self.current_time, self.total_moved
@@ -1251,6 +1276,7 @@ def plan_manifest(
     route_planner: RoutePlanner,
     move_cargo: float,
     cargo_capacity: float,
+    start_cargo: float = 0.0,
 ) -> tuple[list[str], float, float]:
     planner = ManifestPlanner(
         start_node_id=start_node_id,
@@ -1262,6 +1288,7 @@ def plan_manifest(
         route_planner=route_planner,
         move_cargo=move_cargo,
         cargo_capacity=cargo_capacity,
+        start_cargo=start_cargo,
     )
     return planner.run()
 
@@ -1788,10 +1815,6 @@ def run_plan(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     supplies: dict[int, float] = {}
-    if manifest_start_cargo > 0:
-        supplies[start_node_id] = (
-            supplies.get(start_node_id, 0.0) + manifest_start_cargo
-        )
     for name, amount in manifest_waypoints:
         try:
             station_id = resolve_station(name, stations_by_name)
@@ -1800,7 +1823,7 @@ def run_plan(args: argparse.Namespace) -> None:
             sys.exit(1)
         supplies[station_id] = supplies.get(station_id, 0.0) + amount
 
-    total_needed = total_cargo_remaining(supplies)
+    total_needed = total_cargo_remaining(supplies) + manifest_start_cargo
     if total_needed > 0 and destination_station_id is None:
         print(
             "Destination must be a station when moving cargo.", file=sys.stderr
@@ -1837,6 +1860,7 @@ def run_plan(args: argparse.Namespace) -> None:
             route_planner,
             move_cargo,
             cargo_capacity,
+            start_cargo=manifest_start_cargo,
         )
     except (RuntimeError, ValueError) as exc:
         print(str(exc), file=sys.stderr)

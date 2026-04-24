@@ -10,8 +10,7 @@ import heapq
 import math
 import os
 import sys
-from collections.abc import Callable
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 import yaml

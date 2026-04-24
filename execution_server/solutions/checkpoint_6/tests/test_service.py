@@ -10,8 +10,8 @@ import unittest
 from pathlib import Path
 from typing import Any
 
-from runner.environments import EnvironmentLockedError
-from runner.environments import EnvironmentNotFoundError
+from runner.environments import (EnvironmentLockedError,
+                                 EnvironmentNotFoundError)
 from runner.service import ExecutionService
 from runner.validation import ValidationError
 

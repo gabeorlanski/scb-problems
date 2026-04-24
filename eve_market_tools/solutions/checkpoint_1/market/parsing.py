@@ -9,17 +9,14 @@ for market order payloads.
 
 from __future__ import annotations
 
-
 import gzip
 import io
 from typing import Any
 
 import pandas as pd
 
-from .config import REQUIRED_CSV_COLUMNS
-from .config import REQUIRED_STATION_COLUMNS
-from .errors import InvalidColumnsError
-from .errors import InvalidPayloadError
+from .config import REQUIRED_CSV_COLUMNS, REQUIRED_STATION_COLUMNS
+from .errors import InvalidColumnsError, InvalidPayloadError
 from .utils import decode_gzip_bytes
 
 

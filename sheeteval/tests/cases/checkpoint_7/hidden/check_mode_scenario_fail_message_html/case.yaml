@@ -1,0 +1,73 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--html-file",
+      "{html_file}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name"
+            ],
+            [
+              "ScenarioFailHtml"
+            ]
+          ]
+        },
+        "ScenarioFailHtml_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "D4",
+              "",
+              "Scenario Fail",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "ScenarioFailHtml": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2",
+              "comment": "{\"rule\": {\"kind\": \"scenario\", \"points\": 2}, \"scenarios\": {\"case_a\": {\"input\": {\"A1\": 1, \"A2\": 2}, \"output\": 3}, \"case_b\": {\"input\": {\"A1\": 2, \"A2\": 3}, \"output\": 6, \"fail-template\": \"Need $expected got $actual\"}}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "ScenarioFailHtml": {
+          "cells": {
+            "D4": {
+              "formula": "=A1+A2"
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_exact": "Total: 1 / 2 passed\n",
+    "stderr_absent": true,
+    "html_contains": [
+      "Scenario Fail.case_a",
+      "Scenario Fail.case_b",
+      "Need 6 got 5",
+      "<p class=\"total\">Total: 1 / 2 passed</p>"
+    ]
+  }
+}

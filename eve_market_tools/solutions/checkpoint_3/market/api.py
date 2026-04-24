@@ -9,35 +9,22 @@ with SDE data, and defines endpoints for price ingestion and market queries.
 
 from __future__ import annotations
 
-
+import math
 from pathlib import Path
 from typing import Any
 
-from fastapi import Body
-from fastapi import FastAPI
-from fastapi import HTTPException
-from fastapi import Header
-from fastapi import Query
-from fastapi import Request
+from fastapi import Body, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from .classification import ItemClassifier
 from .compression import CompressConfig
 from .config_store import ConfigStore
-from .errors import BadApiKeyError
-from .errors import InfeasibleError
-from .errors import InvalidColumnsError
-from .errors import InvalidModeError
-from .errors import InvalidPayloadError
-from .errors import InvalidValueError
-from .errors import NoCandidatesError
-from .errors import RegionNotFoundError
-from .errors import UnknownHubsError
+from .errors import (BadApiKeyError, InfeasibleError, InvalidColumnsError,
+                     InvalidModeError, InvalidPayloadError, InvalidValueError,
+                     NoCandidatesError, RegionNotFoundError, UnknownHubsError)
 from .models import UnknownItemsError
-from .reprocessing import ReprocessingEngine
-from .reprocessing import ReprocessingYields
+from .reprocessing import ReprocessingEngine, ReprocessingYields
 from .sde import SDERepository
 from .service import MarketService
 
@@ -358,10 +345,33 @@ def create_app(sde_path: Path) -> FastAPI:
                     },
                 )
 
+            def _count_based_5pct(
+                orders_df: Any, *, is_buy: bool
+            ) -> float | None:
+                if orders_df.empty:
+                    return None
+                top_n = max(
+                    1,
+                    math.ceil(
+                        service.config.price.top_percent_volume
+                        * len(orders_df)
+                    ),
+                )
+                sorted_df = orders_df.sort_values(
+                    "price", ascending=not is_buy
+                )
+                top_slice = sorted_df.head(top_n)
+                volume = top_slice["volume_remain"]
+                if volume.sum() == 0:
+                    return round(float(top_slice["price"].mean()), 2)
+                value = float((top_slice["price"] * volume).sum() / volume.sum())
+                return round(value, 2)
+
             def price_lookup(type_id: int) -> dict[str, float | None]:
                 """Look up prices for a type from the market service."""
-                result = service.hub_compare(type_id)
-                if result is None:
+                market_lower = market.lower()
+                station = service.sde.hubs_by_system.get(market_lower)
+                if station is None:
                     return {
                         "buy": None,
                         "sell": None,
@@ -369,12 +379,34 @@ def create_app(sde_path: Path) -> FastAPI:
                         "sell_5pct": None,
                     }
 
-                market_lower = market.lower()
+                all_orders = service.store.all_orders()
+                type_orders = all_orders[
+                    (all_orders["type_id"] == type_id)
+                    & (all_orders["location_id"] == station.station_id)
+                ]
+                if type_orders.empty:
+                    return {
+                        "buy": None,
+                        "sell": None,
+                        "buy_5pct": None,
+                        "sell_5pct": None,
+                    }
+
+                thresholds = service.outliers.compute_single_type_thresholds(
+                    type_orders
+                )
+                filtered_buys, filtered_sells = service.outliers.filter_by_type(
+                    type_orders, thresholds
+                )
                 return {
-                    "buy": result.get(f"{market_lower}_buy"),
-                    "sell": result.get(f"{market_lower}_sell"),
-                    "buy_5pct": result.get(f"{market_lower}_buy_5pct"),
-                    "sell_5pct": result.get(f"{market_lower}_sell_5pct"),
+                    "buy": service.pricing.best_buy(filtered_buys),
+                    "sell": service.pricing.best_sell(filtered_sells),
+                    "buy_5pct": _count_based_5pct(
+                        filtered_buys, is_buy=True
+                    ),
+                    "sell_5pct": _count_based_5pct(
+                        filtered_sells, is_buy=False
+                    ),
                 }
 
         # Perform reprocessing

@@ -19,7 +19,6 @@ test_dependencies:
   - pyyaml
 
 tags:
-  - data-processing
   - cli-tools
   - csv-parsing
   - game-data

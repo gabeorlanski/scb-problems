@@ -264,11 +264,13 @@ class PipelineExecutor:
             output["window_end"] = format_timestamp(row.get("window_end"))
         if self.pipeline.group_by:
             for column in self.pipeline.group_by:
-                output[column] = row.get(column)
+                output[column] = _serialize_json_value(row.get(column))
         for runner in self.aggregators:
-            output[runner.spec.alias] = row.get(runner.spec.alias)
+            output[runner.spec.alias] = _serialize_json_value(
+                row.get(runner.spec.alias)
+            )
         for calc in self.pipeline.post_agg_calcs:
-            output[calc.name] = row.get(calc.name)
+            output[calc.name] = _serialize_json_value(row.get(calc.name))
         return output
 
     def _sort_key(self, entry):
@@ -276,7 +278,7 @@ class PipelineExecutor:
         parts: list[object] = []
         if window_bounds:
             parts.append(window_bounds.start)
-        parts.extend(group_values)
+        parts.extend(_group_sort_key_value(value) for value in group_values)
         return parts
 
 
@@ -616,6 +618,26 @@ def _coerce_physical_value(
 def _extract_timestamp_value(row: dict[str, object]) -> datetime | None:
     value = row.get("timestamp")
     return value if isinstance(value, datetime) else None
+
+
+def _serialize_json_value(value: object) -> object:
+    if isinstance(value, datetime):
+        return format_timestamp(value)
+    return value
+
+
+def _group_sort_key_value(value: object):
+    if value is None:
+        return (0, 0)
+    if isinstance(value, str):
+        return (1, value)
+    if isinstance(value, datetime):
+        return (2, value)
+    if isinstance(value, bool):
+        return (3, int(value))
+    if _is_number(value):
+        return (4, float(value))
+    return (5, str(value))
 
 
 def _parse_timestamp_value(

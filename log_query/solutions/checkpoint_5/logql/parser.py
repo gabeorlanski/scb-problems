@@ -406,6 +406,10 @@ class Parser:
             alias = self._parse_optional_alias()
             return SelectItem(value=None, aggregate=aggregate, alias=alias)
         value = self._parse_value_expr()
+        if isinstance(value, Literal):
+            raise ParseError(
+                "expected field, CANON reference, or POCKET expression"
+            )
         alias = self._parse_optional_alias()
         return SelectItem(value=value, aggregate=None, alias=alias)
 
@@ -611,6 +615,13 @@ class Parser:
                 subquery=table,
             )
         right = self._parse_value_expr()
+        if (
+            isinstance(right, FieldRef)
+            and right.scope_distance == 0
+            and right.alias is None
+            and len(right.parts) == 1
+        ):
+            raise ParseError(f"expected literal near '{right.text}'")
         return ComparisonPredicate(
             left=left, operator=op_token.value, right=right
         )

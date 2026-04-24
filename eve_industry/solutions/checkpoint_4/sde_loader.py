@@ -10,7 +10,6 @@ EVE Online static data from CSV.bz2 files and YAML configuration files.
 
 from __future__ import annotations
 
-
 import bz2
 from pathlib import Path
 

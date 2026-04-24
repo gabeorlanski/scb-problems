@@ -98,9 +98,10 @@ def evaluate_predicate(predicate: Predicate, record: dict) -> bool:
     op_symbol = predicate.operator
     if op_symbol in _ORDERED_OPERATORS:
         return compare_ordered(field_value, literal_value, op_symbol)
-    if op_symbol in {"=", "!="}:
-        equals = values_equal(field_value, literal_value)
-        return equals if op_symbol == "=" else not equals
+    if op_symbol == "=":
+        return values_equal(field_value, literal_value)
+    if op_symbol == "!=":
+        return values_not_equal(field_value, literal_value)
     raise RuntimeExecutionError(
         f"unsupported operator '{op_symbol}'"
     )  # pragma: no cover
@@ -112,6 +113,16 @@ def values_equal(left: Any, right: Any) -> bool:
     if left is None:
         return True
     return left == right
+
+
+def values_not_equal(left: Any, right: Any) -> bool:
+    if right is None:
+        return is_scalar(left)
+    if left is None:
+        return False
+    if not types_match(left, right):
+        return False
+    return left != right
 
 
 def compare_ordered(left: Any, right: Any, operator: str) -> bool:
@@ -139,8 +150,8 @@ def ordered_types_match(left: Any, right: Any) -> bool:
     return False
 
 
-def is_number(value: Any) -> bool:
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
+def is_scalar(value: Any) -> bool:
+    return is_number(value) or isinstance(value, (str, bool))
 
 
 def _normalize_group_value(value: Any) -> tuple[str, Any]:
@@ -219,7 +230,9 @@ class AggregationEngine:
             self.order.append(normalized_key)
         return self.groups[normalized_key]
 
-    def _create_group_state(self, original_key: tuple[Any, ...]) -> dict[str, Any]:
+    def _create_group_state(
+        self, original_key: tuple[Any, ...]
+    ) -> dict[str, Any]:
         aggregates = {
             select_index: create_aggregate_state(call)
             for select_index, call in self.aggregate_specs

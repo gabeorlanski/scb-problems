@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 import os
 import shutil
 import signal
@@ -17,10 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from .file_writer import materialize_files
-from .models import CommandResult
-from .models import CommandSpec
-from .models import ExecutionRequest
-from .models import ExecutionResult
+from .models import (CommandResult, CommandSpec, ExecutionRequest,
+                     ExecutionResult)
 
 
 def _collect_tracked_files(root: Path, patterns: list[str]) -> dict[str, str]:

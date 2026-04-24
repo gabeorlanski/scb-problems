@@ -6,8 +6,7 @@
 from __future__ import annotations
 
 import pytest
-from api.routes import create_app
-from api.routes import reset_state_for_testing
+from api.routes import create_app, reset_state_for_testing
 from fastapi.testclient import TestClient
 
 

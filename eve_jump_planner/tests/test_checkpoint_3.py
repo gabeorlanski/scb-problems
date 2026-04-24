@@ -120,6 +120,7 @@ TURNUR_JITA = {
 }
 
 
+@pytest.mark.functionality
 @pytest.mark.parametrize(
     "case", TURNUR_JITA["cases"], ids=["default", "extra=5"]
 )

@@ -13,24 +13,17 @@ Usage:
 
 from __future__ import annotations
 
-
 import sys
 
 import typer
-from formatters import format_recipe_output
-from formatters import format_t2_invention_output
-from formatters import format_t3_invention_output
-from invention_service import get_t2_invention_data
-from invention_service import get_t3_invention_data
-from invention_service import resolve_invention_item
-from plan_service import generate_build_plan
-from plan_service import load_plan_config
-from plan_service import parse_build_string
-from plan_service import write_jobs_csv
-from plan_service import write_materials_csv
-from recipe_service import build_item_info
-from recipe_service import fetch_recipe_data
-from recipe_service import resolve_item
+from formatters import (format_recipe_output, format_t2_invention_output,
+                        format_t3_invention_output)
+from invention_service import (get_t2_invention_data, get_t3_invention_data,
+                               resolve_invention_item)
+from plan_service import (generate_build_plan, load_plan_config,
+                          parse_build_string, write_jobs_csv,
+                          write_materials_csv)
+from recipe_service import build_item_info, fetch_recipe_data, resolve_item
 from sde_loader import SDELoader
 
 app = typer.Typer()

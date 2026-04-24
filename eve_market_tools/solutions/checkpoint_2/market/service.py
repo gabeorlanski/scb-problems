@@ -9,23 +9,19 @@ aggregation) to provide market analysis functionality through a clean API.
 
 from __future__ import annotations
 
-
 from typing import Any
 
 import pandas as pd
 
 from .aggregation import MarketAggregator
-from .config import DEFAULT_CONFIG
-from .config import MarketConfig
+from .config import DEFAULT_CONFIG, MarketConfig
 from .errors import InvalidModeError
 from .outliers import OutlierDetector
-from .parsing import OrderParser
-from .parsing import StationParser
+from .parsing import OrderParser, StationParser
 from .pricing import PriceCalculator
 from .regions import RegionResolver
 from .sde import SDERepository
-from .store import MarketStore
-from .store import empty_orders_df
+from .store import MarketStore, empty_orders_df
 
 
 class MarketService:
@@ -331,10 +327,6 @@ class MarketService:
         if type_orders.empty:
             return None
 
-        # Compute thresholds
-        thresholds = self.outliers.compute_thresholds(type_orders)
-        type_threshold = thresholds.get(type_id)
-
         result: dict[str, Any] = {}
 
         for system_name, station_info in self.sde.hubs_by_system.items():
@@ -344,13 +336,16 @@ class MarketService:
             if hub_orders.empty:
                 continue
 
-            # Filter outliers
-            if type_threshold:
-                filtered = self.outliers.filter_orders(
-                    hub_orders, {type_id: type_threshold}
-                )
-            else:
-                filtered = hub_orders
+            # Filter outliers per hub for this item type.
+            thresholds = self.outliers.compute_single_type_thresholds(
+                hub_orders
+            )
+            filtered_buys, filtered_sells = self.outliers.filter_by_type(
+                hub_orders, thresholds
+            )
+            filtered = pd.concat(
+                [filtered_buys, filtered_sells], ignore_index=True
+            )
 
             buys = filtered[filtered["is_buy_order"] == True]
             sells = filtered[filtered["is_buy_order"] == False]

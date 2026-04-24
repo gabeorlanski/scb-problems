@@ -10,8 +10,7 @@ import math
 import os
 import sys
 from collections import defaultdict
-from heapq import heappop
-from heapq import heappush
+from heapq import heappop, heappush
 from typing import NamedTuple
 
 # Constants

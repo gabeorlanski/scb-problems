@@ -14,6 +14,8 @@ import sqlite3
 import sys
 from typing import Any
 
+VALID_COLUMN_TYPES = {"INTEGER", "TEXT", "REAL", "BLOB", "TIMESTAMP"}
+
 
 class MigrationError(Exception):
     """Base exception for migration errors."""
@@ -127,7 +129,17 @@ class MigrationTool:
         name = column["name"]
         self._validate_identifier(name)
 
-        col_type = column["type"]
+        raw_col_type = column["type"]
+        if not isinstance(raw_col_type, str):
+            raise MigrationError("column type must be a string")
+
+        col_type = raw_col_type.upper()
+        if col_type not in VALID_COLUMN_TYPES:
+            raise MigrationError(
+                "invalid column type: expected one of "
+                "INTEGER, TEXT, REAL, BLOB, TIMESTAMP"
+            )
+
         parts = [self._quote_identifier(name), col_type]
 
         if column.get("primary_key", False):

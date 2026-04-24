@@ -16,7 +16,6 @@ entry_file: merge_files
 timeout: 10
 
 tags:
-  - data-processing
   - csv
   - tsv
   - jsonl

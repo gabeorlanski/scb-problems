@@ -1,0 +1,2 @@
+entrypoint: get_int_value
+tol: 0.5

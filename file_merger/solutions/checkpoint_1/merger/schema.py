@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 import json
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -67,10 +66,7 @@ class ColumnStats:
         if not self.has_value:
             return "string"
         if mode == "strict":
-            result = self.strict_type or "string"
-            if result == "date" and self.any_timestamp:
-                return "timestamp"
-            return result
+            return self.strict_type or "string"
         # loose mode
         if self.all_bool:
             return "bool"
@@ -123,17 +119,18 @@ def infer_schema(
     stats: dict[str, ColumnStats] = {}
     for path in paths:
         with open_dict_reader(path, csv_options) as reader:
-            assert reader.fieldnames is not None  # validated by helper
-            for name in reader.fieldnames:
+            fieldnames = reader.fieldnames
+            if fieldnames is None:
+                raise cli_error(f'input file "{path}" is missing a header row')
+            for name in fieldnames:
                 stats.setdefault(name, ColumnStats())
             for row in reader:
                 for name, value in row.items():
                     stats[name].observe(value)
-    columns = [
+    return [
         SchemaColumn(name=name, type=stats[name].resolve(mode))
         for name in sorted(stats)
     ]
-    return columns
 
 
 def _detect_value_type(value: str) -> str:
@@ -160,6 +157,4 @@ def _join_types(left: str | None, right: str) -> str:
     pair = {left, right}
     if pair <= {"int", "float"}:
         return "float"
-    if pair <= {"date", "timestamp"}:
-        return "timestamp"
     return "string"

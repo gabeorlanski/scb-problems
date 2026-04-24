@@ -9,10 +9,8 @@ and calculates yields based on structure, skills, and implant settings.
 
 from __future__ import annotations
 
-
 import secrets
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from .classification import ItemClassifier

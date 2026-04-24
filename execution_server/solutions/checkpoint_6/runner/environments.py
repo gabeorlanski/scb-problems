@@ -5,19 +5,16 @@
 
 from __future__ import annotations
 
-
 import shutil
 import tempfile
 import uuid
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from .file_writer import FileMaterializationError
-from .file_writer import materialize_files
+from .file_writer import FileMaterializationError, materialize_files
 
 
 class ConcurrencyMode(str, Enum):

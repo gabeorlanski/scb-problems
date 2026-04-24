@@ -9,12 +9,10 @@ station names, hub names) to standardized region IDs with hub information.
 
 from __future__ import annotations
 
-
 import pandas as pd
 
 from .errors import RegionNotFoundError
-from .sde import SDERepository
-from .sde import StationInfo
+from .sde import SDERepository, StationInfo
 
 
 class RegionResolver:

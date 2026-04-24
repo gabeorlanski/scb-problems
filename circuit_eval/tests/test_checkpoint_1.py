@@ -11,11 +11,8 @@ import re
 from pathlib import Path
 
 import pytest
-from helpers import assert_error_payload
-from helpers import assert_scalar_signals
-from helpers import run_command
-from helpers import run_json_command
-from helpers import write_circ
+from helpers import (assert_error_payload, assert_scalar_signals, run_command,
+                     run_json_command, write_circ)
 
 
 def write_operator_circuit(tmp_path: Path) -> Path:
@@ -145,6 +142,7 @@ def test_check_file_not_found(
     )
 
 
+@pytest.mark.error
 @pytest.mark.parametrize(
     ("case_id", "content"),
     [

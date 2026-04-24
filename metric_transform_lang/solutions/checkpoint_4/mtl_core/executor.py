@@ -260,6 +260,10 @@ class PipelineExecutor:
             alias = source_to_alias.get(source_name, source_name)
             working_relations[alias] = rows
 
+        if not self.pipeline.joins:
+            return []
+
+        joined: list[RuntimeRow] = []
         for join in self.pipeline.joins:
             left_rows = working_relations.get(join.left, [])
             right_rows = working_relations.get(join.right, [])
@@ -267,12 +271,12 @@ class PipelineExecutor:
             # Perform join based on type
             joined = self._perform_join(left_rows, right_rows, join)
 
-            # Store result
+            # Make the latest join result available via the implicit '_' alias.
+            working_relations["_"] = joined
+
+            # Optional explicit alias for chained joins.
             if join.result_alias:
                 working_relations[join.result_alias] = joined
-            else:
-                # Final join result
-                pass
 
         return joined
 
@@ -605,15 +609,15 @@ class PipelineExecutor:
             output["window_end"] = format_timestamp(row.get("window_end"))
         if self.pipeline.group_by:
             for column in self.pipeline.group_by:
-                output[column] = row.get(column)
+                output[column] = _serialize_json_value(row.get(column))
         agg_values = {
-            runner.spec.alias: row.get(runner.spec.alias)
+            runner.spec.alias: _serialize_json_value(row.get(runner.spec.alias))
             for runner in self.aggregators
         }
         for alias in sorted(agg_values):
             output[alias] = agg_values[alias]
         calc_values = {
-            calc.name: row.get(calc.name)
+            calc.name: _serialize_json_value(row.get(calc.name))
             for calc in self.pipeline.post_agg_calcs
         }
         for name in sorted(calc_values):
@@ -992,6 +996,12 @@ def _coerce_physical_value(
 def _extract_timestamp_value(row: dict[str, object]) -> datetime | None:
     value = row.get("timestamp")
     return value if isinstance(value, datetime) else None
+
+
+def _serialize_json_value(value: object) -> object:
+    if isinstance(value, datetime):
+        return format_timestamp(value)
+    return value
 
 
 def _group_sort_key_value(value: object):

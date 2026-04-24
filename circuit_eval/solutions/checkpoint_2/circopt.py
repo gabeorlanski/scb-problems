@@ -12,15 +12,10 @@ import os
 import sys
 from typing import Any
 
-from circuit import CircuitError
-from circuit import CircuitFileNotFoundError
-from circuit import CliUsageError
-from circuit import InputValueParseError
-from circuit import MissingInputError
-from circuit import UnknownInputError
-from circuit import evaluate_circuit
-from circuit import parse_circ_file
-from circuit import validate_circuit
+from circuit import (CircuitError, CircuitFileNotFoundError, CliUsageError,
+                     InputValueParseError, MissingInputError,
+                     UnknownInputError, evaluate_circuit, parse_circ_file,
+                     validate_circuit)
 
 VERSION = "1.0.0"
 

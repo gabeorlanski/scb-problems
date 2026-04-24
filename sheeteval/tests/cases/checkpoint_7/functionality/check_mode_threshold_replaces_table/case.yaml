@@ -1,0 +1,79 @@
+{
+  "case": {
+    "args": [
+      "--check-mode",
+      "--html-file",
+      "{html_file}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "ThreshCheck",
+              2,
+              "Need two checks"
+            ]
+          ]
+        },
+        "ThreshCheck_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "B2",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "ThreshCheck": {
+          "cells": {
+            "B2": {
+              "value": 1,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 1}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "ThreshCheck": {
+          "cells": {
+            "B2": {
+              "value": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_exact": "Total: 0 / 1 passed\n",
+    "stderr_absent": true,
+    "html_contains": [
+      "class=\"threshold\"",
+      "Need two checks",
+      "<p class=\"subtotal\">ThreshCheck: 0 / 1 passed</p>"
+    ],
+    "html_not_contains": [
+      "<th>Rule ID</th>"
+    ]
+  }
+}

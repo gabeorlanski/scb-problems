@@ -9,10 +9,8 @@ and custom exceptions for handling unknown items.
 
 from __future__ import annotations
 
-
 from collections.abc import Iterable
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 

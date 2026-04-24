@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 EXECUTION_ROUND_PLACES = 8
 STATS_ROUND_PLACES = 3
 

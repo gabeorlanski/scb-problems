@@ -41,6 +41,7 @@ def test_checkpoint_2_core(
     )
 
 
+@pytest.mark.functionality
 @pytest.mark.parametrize(
     "case_path",
     SPLIT_DATA,

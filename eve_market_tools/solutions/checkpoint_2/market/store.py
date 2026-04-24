@@ -8,7 +8,6 @@ Provides MarketStore for managing orders with upsert and replace semantics.
 
 from __future__ import annotations
 
-
 import pandas as pd
 
 # DataFrame column definitions

@@ -9,27 +9,21 @@ aggregation) to provide market analysis functionality through a clean API.
 
 from __future__ import annotations
 
-
 from typing import Any
 
 import pandas as pd
 
 from .aggregation import MarketAggregator
 from .classification import ItemClassifier
-from .compression import CompressConfig
-from .compression import CompressionOptimizer
-from .config import DEFAULT_CONFIG
-from .config import MarketConfig
-from .errors import InvalidModeError
-from .errors import UnknownHubsError
+from .compression import CompressConfig, CompressionOptimizer
+from .config import DEFAULT_CONFIG, MarketConfig
+from .errors import InvalidModeError, UnknownHubsError
 from .outliers import OutlierDetector
-from .parsing import OrderParser
-from .parsing import StationParser
+from .parsing import OrderParser, StationParser
 from .pricing import PriceCalculator
 from .regions import RegionResolver
 from .sde import SDERepository
-from .store import MarketStore
-from .store import empty_orders_df
+from .store import MarketStore, empty_orders_df
 
 
 class MarketService:
@@ -341,10 +335,6 @@ class MarketService:
         if type_orders.empty:
             return None
 
-        # Compute thresholds
-        thresholds = self.outliers.compute_thresholds(type_orders)
-        type_threshold = thresholds.get(type_id)
-
         result: dict[str, Any] = {}
 
         for system_name, station_info in self.sde.hubs_by_system.items():
@@ -354,13 +344,16 @@ class MarketService:
             if hub_orders.empty:
                 continue
 
-            # Filter outliers
-            if type_threshold:
-                filtered = self.outliers.filter_orders(
-                    hub_orders, {type_id: type_threshold}
-                )
-            else:
-                filtered = hub_orders
+            # Filter outliers per hub for this item type.
+            thresholds = self.outliers.compute_single_type_thresholds(
+                hub_orders
+            )
+            filtered_buys, filtered_sells = self.outliers.filter_by_type(
+                hub_orders, thresholds
+            )
+            filtered = pd.concat(
+                [filtered_buys, filtered_sells], ignore_index=True
+            )
 
             buys = filtered[filtered["is_buy_order"] == True]
             sells = filtered[filtered["is_buy_order"] == False]
@@ -427,7 +420,7 @@ class MarketService:
         result = self.compression.optimize(target_ids, orders, config)
 
         # Add pricing info for yields and calculate material_value, raw_ship, excess_value
-        self._add_yield_pricing(result, target_ids, config)
+        self._add_yield_pricing(result, target_ids, config, hubs)
 
         return result
 
@@ -485,6 +478,7 @@ class MarketService:
         result: dict[str, Any],
         target_ids: dict[int, int],
         config: CompressConfig,
+        hubs: list[str],
     ) -> None:
         """Add buy/sell pricing info to yields and calculate summary values.
 
@@ -492,10 +486,16 @@ class MarketService:
             result: The optimization result to modify in place.
             target_ids: Target material type IDs and quantities.
             config: Compression config for shipping/collateral rates.
+            hubs: Preferred hub order from request.
         """
         material_value = 0.0  # Cost to buy target materials at 5% sell
         raw_volume = 0.0  # Volume of target materials
         excess_value = 0.0  # Value of all excess materials
+        hub_priority = (
+            [hub.lower() for hub in hubs]
+            if hubs
+            else ["jita", "amarr", "dodixie", "rens", "hek"]
+        )
 
         for mat_name, yield_info in result["yields"].items():
             mat_id = self.sde.type_by_name.get(mat_name.lower())
@@ -505,21 +505,9 @@ class MarketService:
             actual_qty = yield_info["actual"]
             target_qty = yield_info["target"]  # None for byproducts
 
-            # Get 5pct prices for this material
-            hub_data = self.hub_compare(mat_id)
-            sell_5pct = None
-            buy_5pct = None
-
-            if hub_data:
-                # Use first available hub's 5pct prices
-                for hub_name in ["jita", "amarr", "dodixie", "rens", "hek"]:
-                    if f"{hub_name}_sell_5pct" in hub_data:
-                        sell_5pct = hub_data[f"{hub_name}_sell_5pct"]
-                        break
-                for hub_name in ["jita", "amarr", "dodixie", "rens", "hek"]:
-                    if f"{hub_name}_buy_5pct" in hub_data:
-                        buy_5pct = hub_data[f"{hub_name}_buy_5pct"]
-                        break
+            buy_5pct, sell_5pct = self._first_available_hub_5pct(
+                mat_id, hub_priority
+            )
 
             # Set per-yield prices
             if sell_5pct is not None and actual_qty > 0:
@@ -551,3 +539,43 @@ class MarketService:
         result["material_value"] = round(material_value, 2)
         result["raw_ship"] = round(raw_ship, 2)
         result["excess_value"] = round(excess_value, 2)
+
+    def _first_available_hub_5pct(
+        self, type_id: int, hub_priority: list[str]
+    ) -> tuple[float | None, float | None]:
+        """Return first available (buy_5pct, sell_5pct) in requested hub order."""
+        all_orders = self.store.all_orders()
+        if all_orders.empty:
+            return None, None
+
+        type_orders = all_orders[all_orders["type_id"] == type_id]
+        if type_orders.empty:
+            return None, None
+
+        for hub_name in hub_priority:
+            station_info = self.sde.hubs_by_system.get(hub_name)
+            if station_info is None:
+                continue
+            hub_orders = type_orders[
+                type_orders["location_id"] == station_info.station_id
+            ]
+            if hub_orders.empty:
+                continue
+
+            thresholds = self.outliers.compute_single_type_thresholds(
+                hub_orders
+            )
+            filtered_buys, filtered_sells = self.outliers.filter_by_type(
+                hub_orders, thresholds
+            )
+
+            buy_5pct = self.pricing.weighted_top_percent_raw(
+                filtered_buys, is_buy=True
+            )
+            sell_5pct = self.pricing.weighted_top_percent_raw(
+                filtered_sells, is_buy=False
+            )
+            if buy_5pct is not None or sell_5pct is not None:
+                return buy_5pct, sell_5pct
+
+        return None, None

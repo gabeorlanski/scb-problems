@@ -1,0 +1,62 @@
+{
+  "case": {
+    "args": [
+      "--report-file",
+      "{report_file}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            ["name"],
+            ["PenaltyPrereq"]
+          ]
+        },
+        "PenaltyPrereq_Checklist": {
+          "rows": [
+            ["number", "flags"],
+            ["B2", ""],
+            ["B3", ""]
+          ]
+        },
+        "PenaltyPrereq": {
+          "cells": {
+            "B2": {
+              "value": "ok",
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 2}}"
+            },
+            "B3": {
+              "value": "expected",
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 5, \"mode\": \"penalty\", \"depends\": [\"B2\"]}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "PenaltyPrereq": {
+          "cells": {
+            "B2": {"value": "wrong"},
+            "B3": {"value": "wrong"}
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_exact": "Assignment Score: 0 / 7\n",
+    "files": [
+      {
+        "path": "report.txt",
+        "contains": [
+          "[INCORRECT] B2 B2: 0 / 2",
+          "[PREREQ] B3 B3: 0 / 5 (requires B2)",
+          "Sheet 'PenaltyPrereq': 0 / 7",
+          "Total: 0 / 7"
+        ]
+      }
+    ]
+  }
+}

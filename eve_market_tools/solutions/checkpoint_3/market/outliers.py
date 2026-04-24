@@ -9,13 +9,11 @@ to the best buy/sell prices for each item type.
 
 from __future__ import annotations
 
-
 from dataclasses import dataclass
 
 import pandas as pd
 
-from .config import DEFAULT_CONFIG
-from .config import OutlierConfig
+from .config import DEFAULT_CONFIG, OutlierConfig
 
 
 @dataclass

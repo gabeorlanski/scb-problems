@@ -61,9 +61,7 @@ def _wait_for_server(
                 f"{proc.returncode}.\nstdout:\n{stdout}\nstderr:\n{stderr}"
             )
         try:
-            response = httpx.get(
-                f"{base_url}/v1/stats/execution", timeout=0.5
-            )
+            response = httpx.get(f"{base_url}/v1/stats/execution", timeout=0.5)
             if response.status_code == 200:
                 return
         except httpx.RequestError as exc:
@@ -329,6 +327,7 @@ class TestCore:
         payload = response.json()
         _assert_execute_payload(payload, case)
 
+    @pytest.mark.functionality
     def test_final_stats(self, client: httpx.Client) -> None:
         response = client.get("/v1/stats/execution")
         assert response.status_code == 200

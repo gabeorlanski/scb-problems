@@ -10,9 +10,10 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from .errors import CircParseError, DeclarationAfterAssignmentError, DuplicateNameError, MultipleAssignmentError
-from .ast import Signal, Literal, Identifier, BitIndex, BitSlice, Concat, OpCall, Expression, Circuit
-
+from .ast import (BitIndex, BitSlice, Circuit, Concat, Expression, Identifier,
+                  Literal, OpCall, Signal)
+from .errors import (CircParseError, DeclarationAfterAssignmentError,
+                     DuplicateNameError, MultipleAssignmentError)
 
 # Keywords (case-insensitive)
 KEYWORDS = {"input", "output", "wire"}

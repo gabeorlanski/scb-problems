@@ -5,14 +5,10 @@
 
 from __future__ import annotations
 
-
-from statistics import mean
-from statistics import median
-from statistics import stdev
+from statistics import mean, median, stdev
 from threading import Lock
 
-from .utils import STATS_ROUND_PLACES
-from .utils import round_duration
+from .utils import STATS_ROUND_PLACES, round_duration
 
 
 class ExecutionStats:

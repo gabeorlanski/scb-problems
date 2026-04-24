@@ -11,8 +11,8 @@ import math
 import os
 import sys
 from collections import defaultdict
-from heapq import heappush, heappop
-from typing import Dict, List, Tuple, Optional, Set, NamedTuple
+from heapq import heappop, heappush
+from typing import Dict, List, NamedTuple, Optional, Set, Tuple
 
 # Constants
 LY_IN_METERS = 9_460_730_472_580_800.0

@@ -1,5 +1,5 @@
 case:
-  arguments: build --base base_first.yaml --base base_second.yaml --overrides
+  arguments: --base base_first.yaml --base base_second.yaml --overrides
     overrides --flags flags.json --env env.list --out out
   input_roots:
   - files

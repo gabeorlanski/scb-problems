@@ -5,20 +5,16 @@
 
 from __future__ import annotations
 
-
 import json
 from typing import Any
 
-from fastapi import FastAPI
-from fastapi import Request
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from .environments import EnvironmentError
-from .environments import EnvironmentExistsError
-from .environments import EnvironmentLockedError
-from .environments import EnvironmentNotFoundError
+from .environments import (EnvironmentError, EnvironmentExistsError,
+                           EnvironmentLockedError, EnvironmentNotFoundError)
 from .service import ExecutionService
 from .validation import ValidationError
 

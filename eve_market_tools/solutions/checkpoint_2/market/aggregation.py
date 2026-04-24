@@ -9,7 +9,6 @@ and hub comparisons from order data.
 
 from __future__ import annotations
 
-
 from dataclasses import dataclass
 from typing import Any
 

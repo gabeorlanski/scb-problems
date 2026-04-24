@@ -5,11 +5,9 @@
 
 from __future__ import annotations
 
-
 from typing import Any
 
-from .models import CommandSpec
-from .models import ExecutionRequest
+from .models import CommandSpec, ExecutionRequest
 
 
 class ValidationError(Exception):

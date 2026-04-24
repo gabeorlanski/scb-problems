@@ -5,11 +5,9 @@
 
 from __future__ import annotations
 
-
 from typing import Any
 
-from jsonschema import Draft202012Validator
-from jsonschema import ValidationError
+from jsonschema import Draft202012Validator, ValidationError
 
 from .errors import ETLError
 from .path_utils import format_path

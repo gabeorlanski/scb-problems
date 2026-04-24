@@ -8,9 +8,7 @@ from __future__ import annotations
 import csv
 import gzip
 import io
-from datetime import UTC
-from datetime import datetime
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 from conftest import gzip_orders
 from fastapi.testclient import TestClient

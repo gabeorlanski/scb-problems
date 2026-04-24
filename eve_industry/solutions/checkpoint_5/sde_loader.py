@@ -10,7 +10,6 @@ EVE Online static data from CSV.bz2 files and YAML configuration files.
 
 from __future__ import annotations
 
-
 import bz2
 from pathlib import Path
 
@@ -238,18 +237,20 @@ class SDELoader:
         if len(matches) == 0:
             return None
 
-        # Prefer Manufacturing (1) or Reactions (11)
+        # Prefer Manufacturing (1) or Reactions (11).
+        # For manufacturing, keep first-match behavior for compatibility.
         manufacturing = matches[matches["activityID"] == 1]
         if len(manufacturing) > 0:
             row = manufacturing.iloc[0]
             return (int(row["typeID"]), int(row["activityID"]))
 
+        # For reactions, prefer the largest output quantity when duplicates exist.
         reactions = matches[matches["activityID"] == 11]
         if len(reactions) > 0:
-            row = reactions.iloc[0]
+            row = reactions.sort_values("quantity", ascending=False).iloc[0]
             return (int(row["typeID"]), int(row["activityID"]))
 
-        # Return first match as fallback
+        # Fallback to first match
         row = matches.iloc[0]
         return (int(row["typeID"]), int(row["activityID"]))
 

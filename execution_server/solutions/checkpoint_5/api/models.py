@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-
 from typing import Any
 
 from pydantic import BaseModel
@@ -77,7 +76,9 @@ class ExecuteRequest(BaseModel):
         if value is None:
             return ""
         if isinstance(value, list):
-            joined = "\n".join(str(part) for part in value)
+            if any(not isinstance(part, str) for part in value):
+                raise ValueError("stdin list elements must be strings")
+            joined = "\n".join(value)
             if joined and not joined.endswith("\n"):
                 # When stdin is provided as a list, treat each element as a line
                 # entered by a user and automatically append the final newline
@@ -86,7 +87,7 @@ class ExecuteRequest(BaseModel):
             return joined
         if isinstance(value, str):
             return value
-        raise TypeError("stdin must be a string or list of strings")
+        raise ValueError("stdin must be a string or list of strings")
 
 
 class CommandResponse(BaseModel):

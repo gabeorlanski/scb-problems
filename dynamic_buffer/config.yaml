@@ -21,7 +21,6 @@ test_dependencies:
 tags:
   - code-generation
   - metaprogramming
-  - data-processing
   - streaming-algorithms
   - multi-language
   - transform-inference

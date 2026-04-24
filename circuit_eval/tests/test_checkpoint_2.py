@@ -9,11 +9,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from helpers import assert_error_payload
-from helpers import parse_outputs
-from helpers import run_command
-from helpers import run_json_command
-from helpers import write_circ
+from helpers import (assert_error_payload, parse_outputs, run_command,
+                     run_json_command, write_circ)
 
 
 def write_adder(tmp_path: Path) -> Path:
@@ -123,6 +120,7 @@ def test_eval_json_outputs_fields(
     assert values["sum"] == "0"
 
 
+@pytest.mark.error
 @pytest.mark.parametrize(
     ("args", "error_type"),
     [
@@ -222,6 +220,7 @@ def test_eval_default_value_applied(
         )
 
 
+@pytest.mark.error
 @pytest.mark.parametrize("invalid_value", ["X", "2"])
 def test_eval_invalid_input_value(
     entrypoint_argv: list[str],

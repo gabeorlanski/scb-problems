@@ -66,15 +66,20 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
+    schedule_path = Path(args.schedule).expanduser().resolve()
     try:
-        now_utc = _parse_now(args.now)
+        now_utc = _parse_now(args.now).replace(second=0, microsecond=0)
     except ValueError as exc:
         return _print_error("E_SCHEMA", f"Invalid --now value: {exc}")
 
     if args.duration < 0:
         return _print_error("E_SCHEMA", "--duration must be non-negative.")
 
-    mount_root = Path(args.mount).expanduser().resolve()
+    mount_input = Path(args.mount).expanduser()
+    if mount_input.is_absolute():
+        mount_root = mount_input.resolve()
+    else:
+        mount_root = (schedule_path.parent / mount_input).resolve()
     if not mount_root.exists() or not mount_root.is_dir():
         return _print_error(
             "E_SCHEMA", "--mount must point to an existing directory."
@@ -88,7 +93,6 @@ def main() -> int:
                 "E_SCHEMA", "--backup must point to a directory when it exists."
             )
 
-    schedule_path = Path(args.schedule)
     try:
         schedule = load_schedule(schedule_path, mount_root)
     except yaml.YAMLError as exc:
@@ -112,21 +116,22 @@ def main() -> int:
     jobs_sorted = sorted(schedule.jobs, key=lambda job: job.job_id)
 
     due_map = evaluate_due_jobs(schedule, now_utc, args.duration)
-    due_jobs = [
-        job for job in jobs_sorted if due_map.get(job.job_id) is not None
-    ]
-    for job in due_jobs:
-        due_time = due_map[job.job_id]
-        now_local_str = format_local_timestamp(due_time) if due_time else None
-        emitter.emit(
-            {
-                "event": "JOB_ELIGIBLE",
-                "job_id": job.job_id,
-                "kind": job.when.kind,
-                "now_local": now_local_str,
-            }
-        )
-        run_job(job, emitter.emit, run_time=due_time, backup_root=backup_root)
+    for job in jobs_sorted:
+        for due_time in due_map.get(job.job_id, []):
+            emitter.emit(
+                {
+                    "event": "JOB_ELIGIBLE",
+                    "job_id": job.job_id,
+                    "kind": job.when.kind,
+                    "now_local": format_local_timestamp(due_time),
+                }
+            )
+            run_job(
+                job,
+                emitter.emit,
+                run_time=due_time,
+                backup_root=backup_root,
+            )
 
     return 0
 

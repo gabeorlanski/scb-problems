@@ -3,8 +3,6 @@ sources:
     inputs:
       - "data1.csv"
       - "data2.csv"
-      - "cat_filter=A"
-      - "min_val=5.0"
     format: auto
     schema: Data
     precedence: 10

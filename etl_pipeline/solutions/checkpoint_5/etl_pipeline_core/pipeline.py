@@ -5,17 +5,13 @@
 
 from __future__ import annotations
 
-
 import copy
 from typing import Any
 
-from jsonschema import Draft202012Validator
-from jsonschema import ValidationError
+from jsonschema import Draft202012Validator, ValidationError
 
 from .errors import ETLError
-from .path_utils import extend_path
-from .path_utils import format_path
-from .path_utils import make_steps_path_builder
+from .path_utils import extend_path, format_path, make_steps_path_builder
 from .schema_loader import get_request_schema
 from .validator import normalize_steps
 

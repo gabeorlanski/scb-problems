@@ -5,13 +5,10 @@
 
 from __future__ import annotations
 
-
 from typing import Any
 
 from .errors import ETLError
-from .expression import ExpressionError
-from .expression import Node
-from .expression import compile_expression
+from .expression import ExpressionError, Node, compile_expression
 from .path_utils import step_path
 
 

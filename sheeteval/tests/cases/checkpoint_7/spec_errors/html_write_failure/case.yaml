@@ -1,0 +1,71 @@
+{
+  "case": {
+    "args": [
+      "--html-file",
+      "{tmp}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "HtmlErr",
+              "",
+              ""
+            ]
+          ]
+        },
+        "HtmlErr_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "C2",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "HtmlErr": {
+          "cells": {
+            "C2": {
+              "value": 1,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 1}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "HtmlErr": {
+          "cells": {
+            "C2": {
+              "value": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 1,
+    "stderr_contains": [
+      "Error"
+    ]
+  }
+}

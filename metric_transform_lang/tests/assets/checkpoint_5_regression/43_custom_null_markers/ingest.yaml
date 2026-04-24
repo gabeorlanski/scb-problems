@@ -2,7 +2,6 @@ sources:
   - name: main
     inputs:
       - "input.csv"
-      - "\"MISSING,N/A\""
     format: auto
     schema: Data
     precedence: 10

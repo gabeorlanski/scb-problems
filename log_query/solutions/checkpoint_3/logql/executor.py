@@ -124,6 +124,8 @@ def apply_conflation(
     existing_aliases: list[str],
 ) -> list[RowContext]:
     result: list[RowContext] = []
+    matched_rows: list[RowContext] = []
+    unmatched_left_rows: list[RowContext] = []
     matched_indices: set[int] = set()
     new_alias = clause.alias
     for row in rows:
@@ -138,11 +140,20 @@ def apply_conflation(
                 matched_indices.add(idx)
                 new_row = dict(row)
                 new_row[new_alias] = candidate
-                result.append(new_row)
+                if clause.flavor == "BOTH":
+                    matched_rows.append(new_row)
+                else:
+                    result.append(new_row)
         elif clause.flavor in {"LEFT", "BOTH"}:
             new_row = dict(row)
             new_row[new_alias] = None
-            result.append(new_row)
+            if clause.flavor == "BOTH":
+                unmatched_left_rows.append(new_row)
+            else:
+                result.append(new_row)
+    if clause.flavor == "BOTH":
+        result = list(matched_rows)
+        result.extend(unmatched_left_rows)
     if clause.flavor in {"RIGHT", "BOTH"}:
         template = dict.fromkeys(existing_aliases)
         for idx, candidate in enumerate(new_records):
@@ -212,9 +223,10 @@ def evaluate_predicate(predicate: Predicate, context: RowContext) -> bool:
     operator = predicate.operator
     if operator in {"<", "<=", ">", ">="}:
         return compare_ordered(field_value, literal_value, operator)
-    if operator in {"=", "!="}:
-        equals = values_equal(field_value, literal_value)
-        return equals if operator == "=" else not equals
+    if operator == "=":
+        return values_equal(field_value, literal_value)
+    if operator == "!=":
+        return values_not_equal(field_value, literal_value)
     raise RuntimeExecutionError(
         f"unsupported operator '{operator}'"
     )  # pragma: no cover
@@ -226,6 +238,16 @@ def values_equal(left: Any, right: Any) -> bool:
     if left is None:
         return True
     return left == right
+
+
+def values_not_equal(left: Any, right: Any) -> bool:
+    if right is None:
+        return is_scalar(left)
+    if left is None:
+        return False
+    if not types_match(left, right):
+        return False
+    return left != right
 
 
 def compare_ordered(left: Any, right: Any, operator: str) -> bool:
@@ -258,6 +280,10 @@ def ordered_types_match(left: Any, right: Any) -> bool:
     if is_number(left) and is_number(right):
         return True
     return False
+
+
+def is_scalar(value: Any) -> bool:
+    return is_number(value) or isinstance(value, (str, bool))
 
 
 def project_row(

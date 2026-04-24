@@ -1,0 +1,75 @@
+{
+  "case": {
+    "args": [
+      "--html-file",
+      "{html_file}"
+    ],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            [
+              "name",
+              "min-score",
+              "threshold-message"
+            ],
+            [
+              "ThreshHtml",
+              10,
+              "Need ten points"
+            ]
+          ]
+        },
+        "ThreshHtml_Checklist": {
+          "rows": [
+            [
+              "number",
+              "flags",
+              "check-name",
+              "expected-outcome",
+              "fail-message",
+              "expected-points"
+            ],
+            [
+              "E2",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ]
+          ]
+        },
+        "ThreshHtml": {
+          "cells": {
+            "E2": {
+              "value": 1,
+              "comment": "{\"rule\": {\"kind\": \"literal\", \"points\": 4}}"
+            }
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "ThreshHtml": {
+          "cells": {
+            "E2": {
+              "value": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "html_contains": [
+      "class=\"threshold\"",
+      "Need ten points"
+    ],
+    "html_not_contains": [
+      "<th>Rule ID</th>"
+    ]
+  }
+}

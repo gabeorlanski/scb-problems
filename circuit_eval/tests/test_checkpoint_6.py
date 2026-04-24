@@ -12,10 +12,8 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from helpers import assert_error_payload
-from helpers import run_command
-from helpers import run_json_command
-from helpers import write_circ
+from helpers import (assert_error_payload, run_command, run_json_command,
+                     write_circ)
 
 
 def write_json_circuit(tmp_path: Path, name: str, data: dict) -> Path:
@@ -66,6 +64,17 @@ wire t
 t = NOT(a)
 y1 = t
 y2 = NOT(t)
+"""
+
+DIVERGENT_DEPTH_CIRC = """\
+input a b
+output short deep
+wire t1 t2 t3
+short = AND(a, b)
+t1 = NOT(a)
+t2 = OR(t1, b)
+t3 = XOR(t2, a)
+deep = BUF(t3)
 """
 
 NO_WIRES_CIRC = """\
@@ -287,6 +296,21 @@ def test_stats_metrics(
 
 
 @pytest.mark.functionality
+def test_stats_depth_uses_maximum_output_path(
+    entrypoint_argv: list[str],
+    tmp_path: Path,
+) -> None:
+    path = write_circ(tmp_path, "divergent_depth.circ", DIVERGENT_DEPTH_CIRC)
+    result, payload = run_json_command(
+        entrypoint_argv,
+        ["stats", str(path), "--json"],
+    )
+    assert result.returncode == 0
+    assert payload.get("ok") is True
+    assert payload.get("depth") == 4
+
+
+@pytest.mark.functionality
 def test_stats_op_histogram_coverage(
     entrypoint_argv: list[str],
     tmp_path: Path,
@@ -341,10 +365,8 @@ def test_stats_cross_format(
     tmp_path: Path,
     fmt: str,
 ) -> None:
-    """Verify stats produces identical results across formats."""
-    from novel_circuits import DECODER_BENCH
-    from novel_circuits import DECODER_CIRC
-    from novel_circuits import DECODER_JSON
+    """Verify stats works across formats, allowing BENCH differences."""
+    from novel_circuits import DECODER_BENCH, DECODER_CIRC, DECODER_JSON
 
     if fmt == "circ":
         path = write_circ(tmp_path, "decoder.circ", DECODER_CIRC)
@@ -487,14 +509,14 @@ def test_lint_constant_vector_format(
 
 @pytest.mark.functionality
 @pytest.mark.parametrize(
-    ("bits", "limit", "should_skip"),
+    ("bits", "limit", "expectation"),
     [
-        (16, 16, False),  # M=N boundary: should run check
-        (17, 16, True),   # M=N+1 boundary: should skip
-        (20, 16, True),   # M>N: should skip
-        (8, 16, False),   # M<N: should run check
-        (20, 20, False),  # M=N with larger limit: should run check
-        (10, 8, True),    # M>N with smaller limit: should skip
+        (16, 16, "run"),   # M=N boundary: should run check
+        (17, 16, "skip"),  # M=N+1 boundary: should skip
+        (20, 16, "skip"),  # M>N: should skip
+        (8, 16, "run"),    # M<N: should run check
+        (20, 20, "run"),   # M=N with larger limit: should run check
+        (10, 8, "skip"),   # M>N with smaller limit: should skip
     ],
 )
 def test_lint_max_input_bits(
@@ -502,7 +524,7 @@ def test_lint_max_input_bits(
     tmp_path: Path,
     bits: int,
     limit: int,
-    should_skip: bool,
+    expectation: str,
 ) -> None:
     """Verify --max-input-bits flag controls constant check threshold."""
     # Create circuit with specified input bits
@@ -522,15 +544,74 @@ y = REDUCE_XOR(v)
     warnings = payload.get("warnings", [])
     skipped_warnings = [w for w in warnings if w["type"] == "ConstantOutputCheckSkippedWarning"]
 
-    if should_skip:
+    if expectation == "skip":
         assert len(skipped_warnings) == 1
         assert skipped_warnings[0]["name"] is None
         # Message should contain both M and N as decimals
         msg = skipped_warnings[0]["message"]
         assert str(bits) in msg
         assert str(limit) in msg
-    else:
-        assert len(skipped_warnings) == 0
+        return
+
+    assert skipped_warnings == []
+
+
+@pytest.mark.functionality
+def test_lint_max_input_bits_sums_mixed_ports_at_threshold(
+    entrypoint_argv: list[str],
+    tmp_path: Path,
+) -> None:
+    path = write_circ(
+        tmp_path,
+        "mixed_threshold.circ",
+        """\
+        input a[2:0] b[1:0] c
+        output y
+        y = REDUCE_XOR({a, b, c})
+        """,
+    )
+    result, payload = run_json_command(
+        entrypoint_argv,
+        ["lint", str(path), "--max-input-bits", "6", "--json"],
+    )
+    assert result.returncode == 0
+    warnings = payload.get("warnings", [])
+    assert not any(
+        warning["type"] == "ConstantOutputCheckSkippedWarning"
+        for warning in warnings
+    )
+
+
+@pytest.mark.functionality
+def test_lint_max_input_bits_sums_mixed_ports_above_threshold(
+    entrypoint_argv: list[str],
+    tmp_path: Path,
+) -> None:
+    path = write_circ(
+        tmp_path,
+        "mixed_skip.circ",
+        """\
+        input a[2:0] b[2:0] c
+        output y
+        y = REDUCE_XOR({a, b, c})
+        """,
+    )
+    result, payload = run_json_command(
+        entrypoint_argv,
+        ["lint", str(path), "--max-input-bits", "6", "--json"],
+    )
+    assert result.returncode == 0
+    warnings = payload.get("warnings", [])
+    skipped = [
+        warning
+        for warning in warnings
+        if warning["type"] == "ConstantOutputCheckSkippedWarning"
+    ]
+    assert len(skipped) == 1
+    assert skipped[0]["name"] is None
+    msg = skipped[0]["message"]
+    assert "7" in msg
+    assert "6" in msg
 
 
 @pytest.mark.functionality
@@ -558,9 +639,6 @@ z = 0
     # Should be sorted by (type, name)
     # ConstantOutputWarning comes before UnusedInputWarning alphabetically
     # Within same type, sorted by name
-
-    types = [w["type"] for w in warnings]
-    names = [w["name"] for w in warnings]
 
     # Verify sorted order
     sorted_warnings = sorted(warnings, key=lambda w: (w["type"], w.get("name") or ""))
@@ -601,9 +679,7 @@ def test_lint_cross_format(
 ) -> None:
     """Verify lint works with all input formats."""
     # Use DECODER which has no warnings
-    from novel_circuits import DECODER_BENCH
-    from novel_circuits import DECODER_CIRC
-    from novel_circuits import DECODER_JSON
+    from novel_circuits import DECODER_BENCH, DECODER_CIRC, DECODER_JSON
 
     if fmt == "circ":
         path = write_circ(tmp_path, "decoder.circ", DECODER_CIRC)
@@ -648,7 +724,11 @@ def test_dot_basic_structure(
 
     # Verify DOT structure
     content = dot_path.read_text()
-    lines = [l.strip() for l in content.strip().splitlines() if l.strip()]
+    lines = [
+        line.strip()
+        for line in content.strip().splitlines()
+        if line.strip()
+    ]
 
     assert lines[0] == "digraph circopt {"
     assert lines[-1] == "}"
@@ -843,9 +923,7 @@ def test_dot_cross_format(
     fmt: str,
 ) -> None:
     """Verify dot works with all input formats."""
-    from novel_circuits import DECODER_BENCH
-    from novel_circuits import DECODER_CIRC
-    from novel_circuits import DECODER_JSON
+    from novel_circuits import DECODER_BENCH, DECODER_CIRC, DECODER_JSON
 
     if fmt == "circ":
         path = write_circ(tmp_path, "decoder.circ", DECODER_CIRC)

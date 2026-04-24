@@ -5,19 +5,13 @@
 
 from __future__ import annotations
 
-
 import math
 import sys
-from decimal import ROUND_HALF_UP
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 import pandas as pd
-from models import DECRYPTORS
-from models import T3_RELICS
-from models import InventionProbability
-from models import ItemInfo
-from models import T2InventionData
-from models import T3InventionData
+from models import (DECRYPTORS, T3_RELICS, InventionProbability, ItemInfo,
+                    T2InventionData, T3InventionData)
 from recipe_service import determine_tech_level
 from sde_loader import SDELoader
 

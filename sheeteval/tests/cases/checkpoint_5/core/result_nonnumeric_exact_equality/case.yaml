@@ -1,0 +1,43 @@
+{
+  "case": {
+    "args": [],
+    "answer_key": {
+      "sheets": {
+        "EvalManifest": {
+          "rows": [
+            ["name", "min-score", "threshold-message"],
+            ["ResultText", "", ""]
+          ]
+        },
+        "ResultText_Checklist": {
+          "rows": [
+            ["number", "flags", "check-name", "expected-outcome", "fail-message", "expected-points"],
+            ["B2", "", "", "", "", ""]
+          ]
+        },
+        "ResultText": {
+          "cells": {
+            "B2": {
+              "value": "ignored",
+              "comment": "{\"rule\": {\"kind\": \"result\", \"points\": 2, \"target\": \"D2\"}}"
+            },
+            "D2": {"value": "ExactText"}
+          }
+        }
+      }
+    },
+    "submission": {
+      "sheets": {
+        "ResultText": {
+          "cells": {
+            "B2": {"value": " exacttext "}
+          }
+        }
+      }
+    }
+  },
+  "expected": {
+    "returncode": 0,
+    "stdout_exact": "Assignment Score: 0 / 2\n"
+  }
+}
