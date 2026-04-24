@@ -8,14 +8,22 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from .converter import convert_problem, plan_for_problem
-from .errors import BuildSmokeError, CliError, ConversionError, OracleValidationError
-from .log import LOGGER, setup_logging
+from .converter import convert_problem
+from .converter import plan_for_problem
+from .errors import BuildSmokeError
+from .errors import CliError
+from .errors import ConversionError
+from .errors import OracleValidationError
+from .log import LOGGER
+from .log import setup_logging
 from .models import ConversionContext
-from .overrides import load_overrides, resolve_default_overrides_path
-from .specs import discover_problem_dirs, load_problem_spec
+from .overrides import load_overrides
+from .overrides import resolve_default_overrides_path
+from .specs import discover_problem_dirs
+from .specs import load_problem_spec
 from .utils import format_command
 from .validation import resolve_harbor_command
+
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -47,8 +55,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=None,
         help=(
-            "Path to conversion.toml. "
-            "Default: ./conversion.toml if it exists"
+            "Path to conversion.toml. Default: ./conversion.toml if it exists"
         ),
     )
 
@@ -108,6 +115,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
     return args
 
+
 def determine_exit_code_from_exception(exc: Exception) -> int:
     if isinstance(exc, CliError):
         return 1
@@ -119,6 +127,7 @@ def determine_exit_code_from_exception(exc: Exception) -> int:
         return 4
     return 2
 
+
 def main(argv: list[str] | None = None) -> int:
     try:
         args = parse_args(argv)
@@ -126,19 +135,24 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    setup_logging(args.verbose)
+    setup_logging(verbose=args.verbose)
 
     repo_root = Path(__file__).resolve().parent.parent.parent
     available_problems = discover_problem_dirs(repo_root)
 
     if not available_problems:
-        print("ERROR: No problems found (directories with config.yaml)", file=sys.stderr)
+        print(
+            "ERROR: No problems found (directories with config.yaml)",
+            file=sys.stderr,
+        )
         return 1
 
     if args.all:
         selected_names = sorted(available_problems)
     else:
-        unknown = [name for name in args.problem if name not in available_problems]
+        unknown = [
+            name for name in args.problem if name not in available_problems
+        ]
         if unknown:
             print(
                 f"ERROR: unknown problem name(s): {', '.join(sorted(unknown))}",
@@ -153,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
             overrides_path,
             known_problem_names=set(available_problems),
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - CLI boundary maps all failures to exit codes.
         print(f"ERROR: {exc}", file=sys.stderr)
         return determine_exit_code_from_exception(exc)
 
@@ -207,11 +221,13 @@ def main(argv: list[str] | None = None) -> int:
                 task_dir = convert_problem(problem_spec, context=context)
                 LOGGER.info("[%s] done: %s", problem_name, task_dir)
                 successes.append(problem_name)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - continue converting remaining problems.
                 exit_code = determine_exit_code_from_exception(exc)
                 highest_exit_code = max(highest_exit_code, exit_code)
                 failures.append((problem_name, exit_code, str(exc)))
-                LOGGER.error("[%s] failed (exit %s): %s", problem_name, exit_code, exc)
+                LOGGER.error(
+                    "[%s] failed (exit %s): %s", problem_name, exit_code, exc
+                )
 
         if context.dry_run:
             output = {
@@ -219,7 +235,9 @@ def main(argv: list[str] | None = None) -> int:
                 "out": str(context.out_root),
                 "strip_canary": context.strip_canary,
                 "harbor_command": context.harbor_cmd,
-                "overrides": str(resolved_overrides_path) if resolved_overrides_path else None,
+                "overrides": str(resolved_overrides_path)
+                if resolved_overrides_path
+                else None,
                 "plan": dry_run_plan,
                 "failures": [
                     {
@@ -249,4 +267,3 @@ def main(argv: list[str] | None = None) -> int:
             LOGGER.info("Keeping temp dir: %s", context.tmp_dir)
         else:
             shutil.rmtree(context.tmp_dir, ignore_errors=True)
-

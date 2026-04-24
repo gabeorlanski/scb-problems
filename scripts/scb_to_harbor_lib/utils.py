@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import datetime as dt
 import re
 import subprocess
 from pathlib import Path
-from typing import Any
 
 from .log import LOGGER
+
 
 def run_command(
     cmd: list[str],
@@ -24,8 +23,10 @@ def run_command(
         check=False,
     )
 
+
 def format_command(cmd: list[str]) -> str:
     return " ".join(shlex_quote(part) for part in cmd)
+
 
 def shlex_quote(value: str) -> str:
     if not value:
@@ -33,6 +34,7 @@ def shlex_quote(value: str) -> str:
     if re.fullmatch(r"[A-Za-z0-9_./:-]+", value):
         return value
     return "'" + value.replace("'", "'\"'\"'") + "'"
+
 
 def dedupe_casefold(values: list[str]) -> list[str]:
     deduped: list[str] = []
@@ -45,8 +47,10 @@ def dedupe_casefold(values: list[str]) -> list[str]:
         deduped.append(value)
     return deduped
 
+
 def collapse_whitespace(text: str) -> str:
     return " ".join(text.split())
+
 
 def git_revision(repo_root: Path) -> str:
     proc = run_command(["git", "rev-parse", "--short", "HEAD"], cwd=repo_root)
@@ -58,4 +62,3 @@ def git_revision(repo_root: Path) -> str:
     if dirty_proc.returncode == 0 and dirty_proc.stdout.strip():
         sha += "-dirty"
     return sha
-

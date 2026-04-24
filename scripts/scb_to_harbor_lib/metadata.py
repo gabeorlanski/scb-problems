@@ -2,15 +2,19 @@ from __future__ import annotations
 
 import re
 
-from .constants import MANDATORY_KEYWORDS, MAX_KEYWORDS
+from .constants import MANDATORY_KEYWORDS
+from .constants import MAX_KEYWORDS
 from .errors import ConversionError
+
 
 def parse_author(raw_author: str, *, problem_name: str) -> list[dict[str, str]]:
     text = raw_author.strip()
     if not text:
         raise ConversionError(f"{problem_name}: author is empty")
 
-    match = re.match(r"^\s*(?P<name>[^<]+?)(?:\s*<(?P<email>[^>]+)>)?\s*$", text)
+    match = re.match(
+        r"^\s*(?P<name>[^<]+?)(?:\s*<(?P<email>[^>]+)>)?\s*$", text
+    )
     if not match:
         raise ConversionError(
             f"{problem_name}: could not parse author field {raw_author!r}"
@@ -24,6 +28,7 @@ def parse_author(raw_author: str, *, problem_name: str) -> list[dict[str, str]]:
     if email:
         author["email"] = email
     return [author]
+
 
 def build_keywords(tags: list[str]) -> list[str]:
     deduped: list[str] = []
@@ -53,4 +58,3 @@ def build_keywords(tags: list[str]) -> list[str]:
     available = max(0, MAX_KEYWORDS - len(mandatory))
     trimmed = non_mandatory[:available] + mandatory
     return trimmed[:MAX_KEYWORDS]
-

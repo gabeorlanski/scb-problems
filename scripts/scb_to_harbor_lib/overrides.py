@@ -4,15 +4,21 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-from .constants import ALLOWED_OVERRIDE_ENV_KEYS, ALLOWED_OVERRIDE_KEYS
-from .errors import CliError, ConversionError
+from .constants import ALLOWED_OVERRIDE_ENV_KEYS
+from .constants import ALLOWED_OVERRIDE_KEYS
+from .errors import CliError
+from .errors import ConversionError
 
 
 def _is_string_list(value: Any) -> bool:
-    return isinstance(value, list) and all(isinstance(item, str) for item in value)
+    return isinstance(value, list) and all(
+        isinstance(item, str) for item in value
+    )
 
 
-def validate_test_sh_snippet_override(problem_name: str, key: str, value: Any) -> None:
+def validate_test_sh_snippet_override(
+    problem_name: str, key: str, value: Any
+) -> None:
     if key == "test_sh_snippet":
         if not isinstance(value, str):
             raise ConversionError(
@@ -29,7 +35,9 @@ def validate_test_sh_snippet_override(problem_name: str, key: str, value: Any) -
                 raise ConversionError(
                     f"{problem_name}: test_sh_snippets keys must be strings"
                 )
-            if not isinstance(snippet_value, str) and not _is_string_list(snippet_value):
+            if not isinstance(snippet_value, str) and not _is_string_list(
+                snippet_value
+            ):
                 raise ConversionError(
                     f"{problem_name}: test_sh_snippets[{snippet_key!r}] must be "
                     "a string or list of strings"
@@ -41,13 +49,17 @@ def validate_test_sh_snippet_override(problem_name: str, key: str, value: Any) -
         "list of strings, or table of checkpoint names to snippets"
     )
 
-def resolve_default_overrides_path(repo_root: Path, cli_value: Path | None) -> Path | None:
+
+def resolve_default_overrides_path(
+    repo_root: Path, cli_value: Path | None
+) -> Path | None:
     if cli_value is not None:
         return cli_value
     default_path = repo_root / "conversion.toml"
     if default_path.exists():
         return default_path
     return None
+
 
 def load_overrides(
     path: Path | None,
@@ -63,10 +75,14 @@ def load_overrides(
     try:
         parsed = tomllib.loads(path.read_text())
     except tomllib.TOMLDecodeError as exc:
-        raise ConversionError(f"Invalid TOML in overrides file {path}: {exc}") from exc
+        raise ConversionError(
+            f"Invalid TOML in overrides file {path}: {exc}"
+        ) from exc
 
     if not isinstance(parsed, dict):
-        raise ConversionError(f"Overrides file {path} must parse to a TOML table")
+        raise ConversionError(
+            f"Overrides file {path} must parse to a TOML table"
+        )
 
     overrides: dict[str, dict[str, Any]] = {}
 
@@ -97,7 +113,9 @@ def load_overrides(
                 raise ConversionError(
                     f"{problem_name}: override environment must be a table"
                 )
-            env_unknown = set(environment_value.keys()) - ALLOWED_OVERRIDE_ENV_KEYS
+            env_unknown = (
+                set(environment_value.keys()) - ALLOWED_OVERRIDE_ENV_KEYS
+            )
             if env_unknown:
                 raise ConversionError(
                     f"{problem_name}: unknown environment override key(s): "
@@ -113,7 +131,10 @@ def load_overrides(
 
         if "dockerfile" in value:
             dockerfile_value = value["dockerfile"]
-            if not isinstance(dockerfile_value, str) or not dockerfile_value.strip():
+            if (
+                not isinstance(dockerfile_value, str)
+                or not dockerfile_value.strip()
+            ):
                 raise ConversionError(
                     f"{problem_name}: dockerfile override must be a non-empty string"
                 )
@@ -146,11 +167,6 @@ def load_overrides(
                 raise ConversionError(
                     f"{problem_name}: min_reward override must be a non-empty table"
                 )
-            if len(min_reward) != 1:
-                raise ConversionError(
-                    f"{problem_name}: min_reward override must contain exactly one key "
-                    "because Harbor job metrics require scalar rewards"
-                )
 
         for snippet_key in ("test_sh_snippet", "test_sh_snippets"):
             if snippet_key in value:
@@ -168,4 +184,3 @@ def load_overrides(
         overrides[problem_name] = dict(value)
 
     return overrides, path
-

@@ -7,10 +7,15 @@ from typing import Any
 
 import yaml
 
-from .constants import CHECKPOINT_KEY_RE, EXTERNAL_IMPORT_TO_PACKAGE, ALLOWED_DIFFICULTIES
+from .constants import ALLOWED_DIFFICULTIES
+from .constants import CHECKPOINT_KEY_RE
+from .constants import EXTERNAL_IMPORT_TO_PACKAGE
 from .errors import ConversionError
-from .models import CheckpointSpec, ProblemSpec
-from .utils import collapse_whitespace, dedupe_casefold
+from .models import CheckpointSpec
+from .models import ProblemSpec
+from .utils import collapse_whitespace
+from .utils import dedupe_casefold
+
 
 def discover_problem_dirs(repo_root: Path) -> dict[str, Path]:
     problems: dict[str, Path] = {}
@@ -26,6 +31,7 @@ def discover_problem_dirs(repo_root: Path) -> dict[str, Path]:
             problems[child.name] = child
     return problems
 
+
 def normalize_difficulty(raw: Any, problem_name: str) -> str:
     if not isinstance(raw, str):
         raise ConversionError(
@@ -37,6 +43,7 @@ def normalize_difficulty(raw: Any, problem_name: str) -> str:
             f"{problem_name}: difficulty must be one of easy|medium|hard; got {raw!r}"
         )
     return normalized
+
 
 def normalize_tags(raw: Any, *, problem_name: str, field: str) -> list[str]:
     if raw is None:
@@ -55,6 +62,7 @@ def normalize_tags(raw: Any, *, problem_name: str, field: str) -> list[str]:
         tags.append(value)
     return tags
 
+
 def infer_test_dependencies(tests_dir: Path) -> list[str]:
     imports: set[str] = set()
 
@@ -62,7 +70,9 @@ def infer_test_dependencies(tests_dir: Path) -> list[str]:
         return []
 
     for path in tests_dir.rglob("*.py"):
-        if any(part in {"data", "assets", "__pycache__"} for part in path.parts):
+        if any(
+            part in {"data", "assets", "__pycache__"} for part in path.parts
+        ):
             continue
         try:
             tree = ast.parse(path.read_text())
@@ -73,7 +83,11 @@ def infer_test_dependencies(tests_dir: Path) -> list[str]:
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     imports.add(alias.name.split(".")[0])
-            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            elif (
+                isinstance(node, ast.ImportFrom)
+                and node.level == 0
+                and node.module
+            ):
                 imports.add(node.module.split(".")[0])
 
     packages: list[str] = []
@@ -84,11 +98,15 @@ def infer_test_dependencies(tests_dir: Path) -> list[str]:
 
     return dedupe_casefold(packages)
 
-def ensure_valid_identifier(name: str, *, field: str, problem_name: str) -> None:
+
+def ensure_valid_identifier(
+    name: str, *, field: str, problem_name: str
+) -> None:
     if not re.fullmatch(r"[A-Za-z0-9_-]+", name):
         raise ConversionError(
             f"{problem_name}: {field} must match [A-Za-z0-9_-]+, got {name!r}"
         )
+
 
 def resolve_entrypoint_command(
     *,
@@ -105,6 +123,7 @@ def resolve_entrypoint_command(
         return entry_override.strip()
 
     return f"uv run --project /app {entry_file}.py"
+
 
 def ordered_checkpoints(
     problem_dir: Path,
@@ -223,6 +242,7 @@ def ordered_checkpoints(
 
     return checkpoints
 
+
 def collect_static_assets(
     problem_dir: Path, raw_assets: Any
 ) -> dict[str, Path]:
@@ -257,6 +277,7 @@ def collect_static_assets(
         assets[key] = source
     return assets
 
+
 def load_problem_spec(
     problem_dir: Path,
     *,
@@ -270,16 +291,24 @@ def load_problem_spec(
     try:
         config = yaml.safe_load(config_path.read_text())
     except yaml.YAMLError as exc:
-        raise ConversionError(f"{problem_name}: invalid config.yaml: {exc}") from exc
+        raise ConversionError(
+            f"{problem_name}: invalid config.yaml: {exc}"
+        ) from exc
 
     if not isinstance(config, dict):
-        raise ConversionError(f"{problem_name}: config.yaml must contain a mapping")
+        raise ConversionError(
+            f"{problem_name}: config.yaml must contain a mapping"
+        )
 
     raw_name = config.get("name")
     if not isinstance(raw_name, str) or not raw_name.strip():
-        raise ConversionError(f"{problem_name}: config.name must be a non-empty string")
+        raise ConversionError(
+            f"{problem_name}: config.name must be a non-empty string"
+        )
     config_name = raw_name.strip()
-    ensure_valid_identifier(config_name, field="config.name", problem_name=problem_name)
+    ensure_valid_identifier(
+        config_name, field="config.name", problem_name=problem_name
+    )
 
     raw_description = config.get("description")
     if not isinstance(raw_description, str) or not raw_description.strip():
@@ -296,11 +325,15 @@ def load_problem_spec(
 
     raw_category = config.get("category")
     if not isinstance(raw_category, str) or not raw_category.strip():
-        raise ConversionError(f"{problem_name}: config.category must be a string")
+        raise ConversionError(
+            f"{problem_name}: config.category must be a string"
+        )
     category = raw_category.strip()
 
     difficulty = normalize_difficulty(config.get("difficulty"), problem_name)
-    tags = normalize_tags(config.get("tags", []), problem_name=problem_name, field="tags")
+    tags = normalize_tags(
+        config.get("tags", []), problem_name=problem_name, field="tags"
+    )
 
     raw_entry_file = config.get("entry_file")
     if not isinstance(raw_entry_file, str) or not raw_entry_file.strip():
@@ -311,7 +344,9 @@ def load_problem_spec(
 
     tests_dir = problem_dir / "tests"
     if not tests_dir.exists():
-        raise ConversionError(f"{problem_name}: missing tests directory {tests_dir}")
+        raise ConversionError(
+            f"{problem_name}: missing tests directory {tests_dir}"
+        )
 
     raw_timeout = config.get("timeout")
     if raw_timeout is None:
@@ -319,7 +354,9 @@ def load_problem_spec(
     elif isinstance(raw_timeout, (int, float)) and raw_timeout > 0:
         test_timeout_sec = float(raw_timeout)
     else:
-        raise ConversionError(f"{problem_name}: config.timeout must be a positive number")
+        raise ConversionError(
+            f"{problem_name}: config.timeout must be a positive number"
+        )
 
     checkpoints_raw = config.get("checkpoints")
     if not isinstance(checkpoints_raw, dict):
@@ -338,7 +375,9 @@ def load_problem_spec(
             f"{problem_name}: entry_file {entry_file!r} does not exist at {entrypoint_candidate}"
         )
 
-    static_assets = collect_static_assets(problem_dir, config.get("static_assets"))
+    static_assets = collect_static_assets(
+        problem_dir, config.get("static_assets")
+    )
 
     test_dependencies = normalize_tags(
         config.get("test_dependencies", []),
@@ -375,4 +414,3 @@ def load_problem_spec(
         tests_dir=tests_dir,
         override=override,
     )
-
