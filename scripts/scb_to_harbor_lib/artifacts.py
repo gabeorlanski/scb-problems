@@ -11,14 +11,30 @@ from .constants import DEFAULT_VERIFIER_TIMEOUT_SEC
 from .errors import ConversionError
 from .models import ProblemSpec
 
-SNAPSHOT_ARTIFACTS: tuple[str, ...] = (
-    "/app/**/*.py",
-    "/app/requirements.txt",
+ArtifactSpec = str | dict[str, str | list[str]]
+
+DEFAULT_ARTIFACT_EXCLUDES: tuple[str, ...] = (
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".mypy_cache",
+    ".git",
+    "node_modules",
+    "target",
+    "dist",
+    "build",
 )
 
 
-def infer_artifacts_for_checkpoint() -> list[str]:
-    return list(SNAPSHOT_ARTIFACTS)
+def infer_artifacts_for_checkpoint() -> list[ArtifactSpec]:
+    return [
+        {
+            "source": "/app",
+            "destination": "app",
+            "exclude": list(DEFAULT_ARTIFACT_EXCLUDES),
+        }
+    ]
 
 
 def normalize_artifacts_override(
@@ -26,7 +42,7 @@ def normalize_artifacts_override(
     value: Any,
     *,
     checkpoint_count: int,
-) -> list[list[str]]:
+) -> list[list[ArtifactSpec]]:
     if not isinstance(value, list):
         raise ConversionError(
             f"{problem_name}: artifacts_per_step override must be a list"
@@ -42,7 +58,7 @@ def normalize_artifacts_override(
                 f"{problem_name}: artifacts_per_step list-of-lists length must equal "
                 f"number of checkpoints ({checkpoint_count})"
             )
-        result: list[list[str]] = []
+        result: list[list[ArtifactSpec]] = []
         for index, entry in enumerate(value):
             assert isinstance(entry, list)
             if not all(isinstance(path, str) for path in entry):
@@ -149,7 +165,7 @@ def resolve_environment_overrides(
     return environment, environment_env
 
 
-def resolve_step_artifacts(problem: ProblemSpec) -> list[list[str]]:
+def resolve_step_artifacts(problem: ProblemSpec) -> list[list[ArtifactSpec]]:
     inferred = [infer_artifacts_for_checkpoint() for _ in problem.checkpoints]
 
     override_value = problem.override.get("artifacts_per_step")

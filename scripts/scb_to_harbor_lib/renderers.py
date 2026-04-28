@@ -5,6 +5,7 @@ import textwrap
 from pathlib import Path
 from typing import Any
 
+from .artifacts import ArtifactSpec
 from .canary import maybe_strip_canary
 from .constants import ENTRYPOINT_PLACEHOLDER_RE
 from .constants import SCHEMA_VERSION
@@ -20,12 +21,31 @@ from .toml_utils import toml_string
 from .utils import git_revision
 
 
+def _render_artifact(artifact: ArtifactSpec) -> str:
+    if isinstance(artifact, str):
+        return toml_string(artifact)
+
+    source = artifact.get("source")
+    destination = artifact.get("destination")
+    exclude = artifact.get("exclude")
+    if not isinstance(source, str):
+        raise TypeError("artifact source must be a string")
+
+    parts = [f"source = {toml_string(source)}"]
+    if isinstance(destination, str):
+        parts.append(f"destination = {toml_string(destination)}")
+    if isinstance(exclude, list):
+        excludes = ", ".join(toml_string(item) for item in exclude)
+        parts.append(f"exclude = [{excludes}]")
+    return "{ " + ", ".join(parts) + " }"
+
+
 def render_task_toml(
     *,
     problem: ProblemSpec,
     org: str,
     task_artifacts: list[str],
-    step_artifacts: list[list[str]],
+    step_artifacts: list[list[ArtifactSpec]],
     min_reward: dict[str, float],
     environment: dict[str, Any],
     environment_env: dict[str, str],
@@ -122,7 +142,7 @@ def render_task_toml(
         if artifacts:
             lines.append("artifacts = [")
             for artifact_path in artifacts:
-                lines.append(f"  {toml_string(artifact_path)},")
+                lines.append(f"  {_render_artifact(artifact_path)},")
             lines.append("]")
         else:
             lines.append("artifacts = []")
