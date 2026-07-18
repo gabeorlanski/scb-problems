@@ -1,0 +1,100 @@
+{
+  "intervals": [
+    {
+      "covered": "1",
+      "estimator": "crossfit",
+      "level": "0.8000000000",
+      "lower": "-0.3661237267",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.1847496828",
+      "study_id": "bootstrap-basic",
+      "target": "nie",
+      "upper": "0.0730251071"
+    },
+    {
+      "covered": "1",
+      "estimator": "crossfit",
+      "level": "0.9500000000",
+      "lower": "-0.4242022009",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.1847496828",
+      "study_id": "bootstrap-basic",
+      "target": "nie",
+      "upper": "0.1459680870"
+    },
+    {
+      "covered": "1",
+      "estimator": "crossfit",
+      "level": "0.8000000000",
+      "lower": "-0.0906393761",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.3459907121",
+      "study_id": "bootstrap-basic",
+      "target": "nde",
+      "upper": "0.4797876977"
+    },
+    {
+      "covered": "1",
+      "estimator": "crossfit",
+      "level": "0.9500000000",
+      "lower": "-0.1020116073",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.3459907121",
+      "study_id": "bootstrap-basic",
+      "target": "nde",
+      "upper": "0.9850101212"
+    },
+    {
+      "covered": "1",
+      "estimator": "plugin",
+      "level": "0.8000000000",
+      "lower": "-0.4234638946",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.1904872551",
+      "study_id": "bootstrap-basic",
+      "target": "nie",
+      "upper": "0.0588865766"
+    },
+    {
+      "covered": "1",
+      "estimator": "plugin",
+      "level": "0.9500000000",
+      "lower": "-0.4467472809",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.1904872551",
+      "study_id": "bootstrap-basic",
+      "target": "nie",
+      "upper": "0.1142209915"
+    },
+    {
+      "covered": "1",
+      "estimator": "plugin",
+      "level": "0.8000000000",
+      "lower": "-0.0791775364",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.3372427954",
+      "study_id": "bootstrap-basic",
+      "target": "nde",
+      "upper": "0.5231775697"
+    },
+    {
+      "covered": "1",
+      "estimator": "plugin",
+      "level": "0.9500000000",
+      "lower": "-0.1212816427",
+      "method": "paired-bootstrap",
+      "resamples": "12",
+      "se": "0.3372427954",
+      "study_id": "bootstrap-basic",
+      "target": "nde",
+      "upper": "0.9471660596"
+    }
+  ]
+}

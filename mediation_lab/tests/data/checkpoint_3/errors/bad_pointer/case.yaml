@@ -1,0 +1,5 @@
+case:
+  command: matrix
+  input: plan.yaml
+expected:
+  status_code: 2

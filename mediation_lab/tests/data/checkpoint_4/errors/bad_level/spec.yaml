@@ -1,0 +1,77 @@
+schema_version: 1
+study_id: bad-level
+seed: 5555
+n: 60
+target_n: 18
+p: 3
+q: 2
+treatment_probability: 0.5
+generation:
+  covariate_correlation: 0.3
+  mediator_correlation: 0.25
+  target_shift:
+  - 0.3
+  - 0.2
+  - 0.1
+  mediator_noise:
+    arm0: 0.7
+    arm1: 0.9
+  outcome_noise:
+    arm0: 0.8
+    arm1: 1.0
+model:
+  mediator:
+    arm0:
+      intercept:
+      - 0.1
+      - 0.07
+      coefficients:
+      - - 0.25
+        - 0.0
+        - -0.08
+      - - -0.08
+        - 0.28
+        - 0.0
+    arm1:
+      intercept:
+      - 0.24
+      - 0.22
+      coefficients:
+      - - 0.4
+        - 0.07
+        - 0.0
+      - - 0.0
+        - 0.42500000000000004
+        - 0.07
+  outcome:
+    arm0:
+      intercept: -0.1
+      covariates:
+      - 0.2
+      - 0.17
+      - 0.14
+      mediators:
+      - 0.38
+      - -0.36
+    arm1:
+      intercept: 0.2
+      covariates:
+      - 0.3
+      - 0.275
+      - 0.25
+      mediators:
+      - 0.52
+      - -0.502
+estimation:
+  ridge: 0.5
+  estimators:
+  - plugin
+  - crossfit
+  folds: 3
+  fold_offset: 1
+inference:
+  method: paired-bootstrap
+  resamples: 12
+  levels:
+  - 0.5
+  - 0.95

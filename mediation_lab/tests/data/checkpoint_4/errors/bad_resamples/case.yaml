@@ -1,0 +1,5 @@
+case:
+  command: run
+  input: spec.yaml
+expected:
+  status_code: 2

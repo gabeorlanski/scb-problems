@@ -1,0 +1,28 @@
+{
+  "intervals": [
+    {
+      "covered": "1",
+      "estimator": "plugin",
+      "level": "0.9000000000",
+      "lower": "-0.0022355271",
+      "method": "paired-bootstrap",
+      "resamples": "10",
+      "se": "0.0859160332",
+      "study_id": "plugin-bootstrap",
+      "target": "nie",
+      "upper": "0.2201260715"
+    },
+    {
+      "covered": "1",
+      "estimator": "plugin",
+      "level": "0.9000000000",
+      "lower": "-0.1643226283",
+      "method": "paired-bootstrap",
+      "resamples": "10",
+      "se": "0.5991083736",
+      "study_id": "plugin-bootstrap",
+      "target": "nde",
+      "upper": "1.4388736303"
+    }
+  ]
+}
