@@ -1,0 +1,173 @@
+{
+  "assets": {
+    "LICENSE.python-semver": {
+      "bytes": 1499,
+      "sha256": "cc10179de9ced8655d7765bd3a8ac46438a61e663de7cf1c48d502d2baf9f3d5"
+    },
+    "python-semver-2.13.0-source.tar.gz": {
+      "bytes": 43789,
+      "sha256": "d683fd1dec4c94edcc1d377180a0901803d15d19e9b58a8da61423c1fadb59d3"
+    },
+    "python-semver-2.13.0/CHANGELOG.rst": {
+      "bytes": 12320,
+      "sha256": "ada4eea651123006cad6e651c6f2b3347d75ab54fe0baa45904f663cede72f9e"
+    },
+    "python-semver-2.13.0/LICENSE.txt": {
+      "bytes": 1496,
+      "sha256": "cda490c32e61d3884dc17791fc8078f2a3e564fba98dd18b4dc64eb2720b2b6f"
+    },
+    "python-semver-2.13.0/README.rst": {
+      "bytes": 3743,
+      "sha256": "819105bbbc6cd903a1b3da3fb7f2cc131244848dc929dd742c207f72d215d818"
+    },
+    "python-semver-2.13.0/release-procedure.md": {
+      "bytes": 2504,
+      "sha256": "b2ae89cbb28edd9cd33af4cd1b8d2165b97872f1b3d808265cc6888e2e84d08b"
+    },
+    "python-semver-2.13.0/semver.py": {
+      "bytes": 36620,
+      "sha256": "72c561e531a5bf36388dcb3373b5a269629f0d0ca58deececc7ed1e8aaa4a797"
+    },
+    "python-semver-3.0.0-source.tar.gz": {
+      "bytes": 200473,
+      "sha256": "10b272c1f4e52e883d691ccedccb246e8220b558d964cffb6218cbcd0b60839e"
+    },
+    "python-semver-3.0.0/CHANGELOG.rst": {
+      "bytes": 10845,
+      "sha256": "8284e561dc0a8a8780e2cdef293743b1c45fa63a10bb7f2a64856ac2340d4a65"
+    },
+    "python-semver-3.0.0/LICENSE.txt": {
+      "bytes": 1496,
+      "sha256": "cda490c32e61d3884dc17791fc8078f2a3e564fba98dd18b4dc64eb2720b2b6f"
+    },
+    "python-semver-3.0.0/README.rst": {
+      "bytes": 4174,
+      "sha256": "5216674237e5174488fe13cc62ab20b3cf55543cc241bdf327397b90e01c750d"
+    },
+    "python-semver-3.0.0/docs/migration/index.rst": {
+      "bytes": 133,
+      "sha256": "3f7445d16a2c575877fe25c676ed14ebfe3f850c098854327208b4606307eb7e"
+    },
+    "python-semver-3.0.0/docs/migration/migratetosemver3.rst": {
+      "bytes": 1572,
+      "sha256": "60a642313c80b96507a76305e377c8fa2c59cbbc1b4d5d27b85107794dd11bdc"
+    },
+    "python-semver-3.0.0/docs/migration/replace-deprecated-functions.rst": {
+      "bytes": 3147,
+      "sha256": "0b7e684766cf55fa12ea89e37336fa3fee406e39ad7cb46928a5c0b65d18e481"
+    },
+    "python-semver-3.0.0/release-procedure.md": {
+      "bytes": 3480,
+      "sha256": "64f35e8fbd2436dd9a640253b0bc53efd0de3423041e742e63efe9e6b0083802"
+    },
+    "python-semver-3.0.0/src/semver/__about__.py": {
+      "bytes": 815,
+      "sha256": "d3e5151983e82ab077be769257494544f1132dfde8f07ae8f4c2c661ad118a07"
+    },
+    "python-semver-3.0.0/src/semver/__init__.py": {
+      "bytes": 688,
+      "sha256": "1fcd2e59d783f8e43e61f00190e76c513e6e01009f41794de1fc2dfe8488142a"
+    },
+    "python-semver-3.0.0/src/semver/__main__.py": {
+      "bytes": 592,
+      "sha256": "faca061737343ace662feca0c935437b682f5a8cd83419f3b628f53686c4ebd1"
+    },
+    "python-semver-3.0.0/src/semver/_deprecated.py": {
+      "bytes": 11272,
+      "sha256": "c5cd71baa58b7e99b74b78b6a487a835668c2707a61b86be5bdaf401c9b6c61d"
+    },
+    "python-semver-3.0.0/src/semver/_types.py": {
+      "bytes": 422,
+      "sha256": "f807dacd98279a631eed6b614b1fccfb0d410a7ab674f166cac8e6b533a6d687"
+    },
+    "python-semver-3.0.0/src/semver/cli.py": {
+      "bytes": 5188,
+      "sha256": "7f38305a5bfa20a6d5831517f4c73e0773189a97c1c0696d55053f8072dfcb75"
+    },
+    "python-semver-3.0.0/src/semver/py.typed": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "python-semver-3.0.0/src/semver/version.py": {
+      "bytes": 24094,
+      "sha256": "078c93eff791abff5e9b5e263aaded2db1523b9068bc3dd5e92946e324907e50"
+    },
+    "python-semver-3.0.4-source.tar.gz": {
+      "bytes": 265618,
+      "sha256": "d361c84678e5970c6397acb6683e6301a3a4ee99bb9e857a8357cd2dadeaa5d7"
+    },
+    "python-semver-3.0.4/CHANGELOG.rst": {
+      "bytes": 14568,
+      "sha256": "015184f1f579c4ea4ca69243ec467ebe67fdbe679589dea91054300102f2bceb"
+    },
+    "python-semver-3.0.4/LICENSE.txt": {
+      "bytes": 1499,
+      "sha256": "cc10179de9ced8655d7765bd3a8ac46438a61e663de7cf1c48d502d2baf9f3d5"
+    },
+    "python-semver-3.0.4/README.rst": {
+      "bytes": 3585,
+      "sha256": "50123391f073871e4e22758f559a24f60247ac9cc3dbc9d19be50a415edbe992"
+    },
+    "python-semver-3.0.4/docs/migration/index.rst": {
+      "bytes": 219,
+      "sha256": "caf304bcff43698c83831a76af473f330347fcbc8057aa67774b1e24b50b51bb"
+    },
+    "python-semver-3.0.4/docs/migration/migratetosemver3.rst": {
+      "bytes": 1648,
+      "sha256": "e5fb3fba7c51d96b15806f6d77aeb28d614bf74b9bf9f660c1fd4be293189f1f"
+    },
+    "python-semver-3.0.4/docs/migration/replace-deprecated-functions.rst": {
+      "bytes": 4263,
+      "sha256": "aee250751e08d1077f261d71e0f3b8bdc29babb92d4cba57cd96ab2b0c9c61cd"
+    },
+    "python-semver-3.0.4/release-procedure.md": {
+      "bytes": 4622,
+      "sha256": "9388b7841e3a6044a3bce8efb5411727907bbdab8ac884e317f436946b9ec979"
+    },
+    "python-semver-3.0.4/src/semver/__about__.py": {
+      "bytes": 815,
+      "sha256": "a6b434cb74b7b13f41c8dd4240fae4ac016bf73affe496af60ca73b4f8ed51fd"
+    },
+    "python-semver-3.0.4/src/semver/__init__.py": {
+      "bytes": 1269,
+      "sha256": "451063ea4bae61a098e41f602f1c04d21ee6781c2ead811b7d0667bfbb7590a3"
+    },
+    "python-semver-3.0.4/src/semver/__main__.py": {
+      "bytes": 593,
+      "sha256": "9ac50bab82dbd0057c2b8aee9619b4173cc93bca0c0afe761a37131b6b7c8b0b"
+    },
+    "python-semver-3.0.4/src/semver/_deprecated.py": {
+      "bytes": 11273,
+      "sha256": "38e5fe01e698f90a892b6810184f2974913187fd774cffbd012640920a829ade"
+    },
+    "python-semver-3.0.4/src/semver/_types.py": {
+      "bytes": 422,
+      "sha256": "f807dacd98279a631eed6b614b1fccfb0d410a7ab674f166cac8e6b533a6d687"
+    },
+    "python-semver-3.0.4/src/semver/cli.py": {
+      "bytes": 5189,
+      "sha256": "1f0be99ea70df791b7388354e1c2e0a2e4470ad5a146cb8a8217e13d6b4639ec"
+    },
+    "python-semver-3.0.4/src/semver/py.typed": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "python-semver-3.0.4/src/semver/version.py": {
+      "bytes": 24041,
+      "sha256": "8e963809189c13aa43d07f9a7679c4a90fa68d1911b4c63d5d23edead9de68bf"
+    }
+  },
+  "license": {
+    "path": "LICENSE.python-semver",
+    "sha256": "cc10179de9ced8655d7765bd3a8ac46438a61e663de7cf1c48d502d2baf9f3d5",
+    "spdx": "BSD-3-Clause"
+  },
+  "schema_version": "1.1.0",
+  "selection": "public package source, license, changelog, README, migration guide, and release procedure only",
+  "tags": {
+    "2.13.0": "4090b942ae5fbbd980cd4716b45dc34409341951",
+    "3.0.0": "3a7680dc436211227c0aeae84c9b45e0b3345b8f",
+    "3.0.4": "6adf8765f6e21910f1f0c13151ce84f32f8d431d"
+  },
+  "upstream": "https://github.com/python-semver/python-semver.git"
+}
