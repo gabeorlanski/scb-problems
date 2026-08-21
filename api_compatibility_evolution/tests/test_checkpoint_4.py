@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import pytest
-
-from case_utils import error, invoke, payload, write_tree
+from case_utils import error
+from case_utils import invoke
+from case_utils import payload
+from case_utils import write_tree
 
 
 def test_sarif_uses_error_for_breaking_change(entrypoint_argv, tmp_path):
