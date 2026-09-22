@@ -29,49 +29,10 @@ def validate_static_outputs(task_dir: Path) -> None:
         raise ConversionError(f"{shim}: invalid Python syntax: {exc}") from exc
 
 
-def smoke_build_task(task_dir: Path, *, context: ConversionContext) -> None:
-    check_cmd = context.harbor_cmd + ["task", "check", str(task_dir)]
-    check_proc = run_command(check_cmd)
-    if check_proc.returncode != 0:
-        raise BuildSmokeError(
-            "\n".join(
-                [
-                    f"harbor task check failed for {task_dir}",
-                    check_proc.stdout.strip(),
-                    check_proc.stderr.strip(),
-                ]
-            ).strip()
-        )
-
-    build_only_cmd = context.harbor_cmd + [
-        "task",
-        "start-env",
-        "-p",
-        str(task_dir),
-        "-e",
-        "docker",
-        "--build-only",
-    ]
-    build_only_proc = run_command(build_only_cmd)
-    if build_only_proc.returncode == 0:
-        return
-
-    combined = f"{build_only_proc.stdout}\n{build_only_proc.stderr}"
-    unknown_build_only = "--build-only" in combined and (
-        "No such option" in combined or "unrecognized arguments" in combined
-    )
-
-    if not unknown_build_only:
-        raise BuildSmokeError(
-            "\n".join(
-                [
-                    f"harbor task start-env failed for {task_dir}",
-                    build_only_proc.stdout.strip(),
-                    build_only_proc.stderr.strip(),
-                ]
-            ).strip()
-        )
-
+def smoke_build_task(task_dir: Path) -> None:
+    # Harbor no longer ships a structural task check (`harbor check` is an
+    # LLM rubric review) or `start-env --build-only`, so build the image
+    # directly; oracle validation exercises the full task through Harbor.
     tag = f"scb-converter-smoke-{task_dir.name}-{int(dt.datetime.now().timestamp())}"
     docker_cmd = ["docker", "build", "-t", tag, str(task_dir / "environment")]
     docker_proc = run_command(docker_cmd)
