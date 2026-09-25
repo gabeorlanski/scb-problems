@@ -15,6 +15,8 @@ ENV TERM=xterm
 ENV COLUMNS=240
 ENV LINES=60
 
+# media-types provides /etc/mime.types, which Python's mimetypes module reads
+# (the native runner image gets it through its GUI and service packages).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         build-essential \
@@ -24,6 +26,7 @@ RUN apt-get update \
         procps \
         util-linux \
         docker-cli \
+        media-types \
  && (apt-get install -y --no-install-recommends docker-compose-plugin \
         || apt-get install -y --no-install-recommends docker-compose-v2 \
         || apt-get install -y --no-install-recommends docker-compose) \
@@ -63,6 +66,8 @@ ENV TERM=xterm
 ENV COLUMNS=240
 ENV LINES=60
 
+# media-types provides /etc/mime.types, which Python's mimetypes module reads
+# (the native runner image gets it through its GUI and service packages).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         build-essential \
@@ -75,6 +80,7 @@ RUN apt-get update \
         pkg-config \
         libssl-dev \
         sqlite3 \
+        media-types \
  && (apt-get install -y --no-install-recommends docker-compose-plugin \
         || apt-get install -y --no-install-recommends docker-compose-v2 \
         || apt-get install -y --no-install-recommends docker-compose) \
