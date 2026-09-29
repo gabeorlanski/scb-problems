@@ -90,7 +90,9 @@ Each **step** in `"trajectory"` has:
   * The first assistant step’s `output_tokens`/`cost` are the totals after that step.
   * Later assistant steps must have totals ≥ previous assistant step totals.
 
-* If any assistant steps exist, **at least one** assistant step must appear before the end of the trajectory.
+* If any assistant steps exist, **at least one** assistant step must appear before the final step: a
+  trajectory whose only assistant step is its final step is invalid. A trajectory with no assistant steps
+  satisfies this rule.
 * Payload size limit: ≤ 5 MB (reject larger with `413` error).
 
 ### Search query (request parameters)

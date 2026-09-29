@@ -181,7 +181,8 @@ Output handling:
 
 # Summary And Scheduling
 
-The stdout summary now includes a `tasks` object keyed by executed task name:
+For multi-task configs, the stdout summary now includes a `tasks` object keyed by executed task name (a
+single-task config keeps the Part 1 summary, without `tasks`):
 
 ```json
 {

@@ -30,7 +30,8 @@ Empty values or unknown columns return `HTTP 400`.
 
 `_shape=lists` (default): `rows` is arrays.
 
-`_shape=objects`: `rows` is objects and includes `rowid` (1-based source-file row number). `rowid` is not in `columns`.
+`_shape=objects`: `rows` is objects and includes `rowid` (the 1-based line number in the source file, counting the header line, so the first data row has
+`rowid` 2). `rowid` is not in `columns`.
 
 ### Visibility toggles
 
