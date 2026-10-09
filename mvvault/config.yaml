@@ -63,7 +63,7 @@ checkpoints:
     version: 2
     order: 6
     state: Core Tests
-    include_prior_tests: false
+    include_prior_tests: true
 
 test_dependencies:
   - httpx
