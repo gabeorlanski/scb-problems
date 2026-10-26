@@ -1,0 +1,9 @@
+{
+  "args": [
+    "audit",
+    "{document}",
+    "--labels",
+    "{case_dir}/nope.json"
+  ],
+  "expected_status": 6
+}

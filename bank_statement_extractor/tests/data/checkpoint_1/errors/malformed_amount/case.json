@@ -1,0 +1,8 @@
+{
+  "args": [
+    "extract",
+    "{document}"
+  ],
+  "expected_status": 3,
+  "superseded_at": "checkpoint_3"
+}

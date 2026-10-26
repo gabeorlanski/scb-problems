@@ -1,0 +1,19 @@
+{
+  "document_id": "e",
+  "account_number": null,
+  "opening_balance": null,
+  "closing_balance": null,
+  "transactions": [
+    {
+      "index": 1,
+      "page": 1,
+      "date": "2024-02-01",
+      "description": "X",
+      "amount": "-12.50",
+      "balance": null,
+      "flags": [
+        "balance_missing"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "args": [
+    "extract",
+    "{document}"
+  ],
+  "expected_status": 0
+}

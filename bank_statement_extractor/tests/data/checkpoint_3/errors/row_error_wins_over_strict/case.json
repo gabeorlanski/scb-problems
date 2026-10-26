@@ -1,0 +1,8 @@
+{
+  "args": [
+    "extract",
+    "--strict",
+    "{document}"
+  ],
+  "expected_status": 3
+}
