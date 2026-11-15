@@ -1,0 +1,27 @@
+{
+  "document_id": "stmt-inherit",
+  "account_number": null,
+  "opening_balance": null,
+  "closing_balance": null,
+  "transactions": [
+    {
+      "index": 1,
+      "page": 1,
+      "date": "2024-06-30",
+      "description": "LAST OF MONTH",
+      "amount": "-1.00",
+      "balance": "99.00"
+    },
+    {
+      "index": 2,
+      "page": 2,
+      "date": "2024-06-30",
+      "description": "LATE POSTING",
+      "amount": "-2.00",
+      "balance": "97.00",
+      "flags": [
+        "date_inherited"
+      ]
+    }
+  ]
+}

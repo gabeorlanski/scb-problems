@@ -1,0 +1,24 @@
+{
+  "document_id": "stmt-syn",
+  "account_number": null,
+  "opening_balance": "100.00",
+  "closing_balance": null,
+  "transactions": [
+    {
+      "index": 1,
+      "page": 1,
+      "date": "2024-07-01",
+      "description": "WAGES",
+      "amount": "900.00",
+      "balance": "1000.00"
+    },
+    {
+      "index": 2,
+      "page": 1,
+      "date": "2024-07-02",
+      "description": "POWER BILL",
+      "amount": "-150.00",
+      "balance": "850.00"
+    }
+  ]
+}

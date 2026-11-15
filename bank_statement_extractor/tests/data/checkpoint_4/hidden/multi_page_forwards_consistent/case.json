@@ -1,0 +1,7 @@
+{
+  "args": [
+    "reconcile",
+    "{document}"
+  ],
+  "expected_status": 0
+}

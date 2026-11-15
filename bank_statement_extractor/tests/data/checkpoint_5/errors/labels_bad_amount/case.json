@@ -1,0 +1,9 @@
+{
+  "args": [
+    "audit",
+    "{document}",
+    "--labels",
+    "{labels}"
+  ],
+  "expected_status": 6
+}

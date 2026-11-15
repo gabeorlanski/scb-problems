@@ -1,0 +1,7 @@
+{
+  "args": [
+    "extract",
+    "{case_dir}/does_not_exist.json"
+  ],
+  "expected_status": 1
+}

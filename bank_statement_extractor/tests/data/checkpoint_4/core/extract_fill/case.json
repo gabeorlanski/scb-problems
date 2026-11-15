@@ -1,0 +1,8 @@
+{
+  "args": [
+    "extract",
+    "--fill",
+    "{document}"
+  ],
+  "expected_status": 0
+}
